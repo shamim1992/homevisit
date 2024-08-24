@@ -5,7 +5,7 @@ const Sidebar = () => {
     return (
         <div className="min-h-screen w-60 bg-gray-800 text-white">
             <div className="p-4">
-                <h2 className="text-xl font-bold">Physio Dashboard</h2>
+                <h2 className="text-xl font-bold">ChanRe Physio</h2>
             </div>
             <ul className="mt-6">
                 <li className="p-3">

@@ -3,12 +3,13 @@ import Sidebar from '../../components/physio/Sidebar';
 import Navbar from '../../components/physio/Navbar';
 import axios from 'axios';
 import moment from 'moment';
+import { FaEye } from "react-icons/fa";
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const token = localStorage.getItem('token');
-
+console.log(selectedAppointment)
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
@@ -68,24 +69,26 @@ const Appointments = () => {
                         <table className="table w-full">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Booking Date</th>
                                     <th>Patient</th>
                                     <th>Status</th>
+                                    <th>Session Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {appointments.map((item) => (
                                     <tr key={item._id}>
-                                        <td>{moment(item.createdAt).format('MMMM D, YYYY')}</td>
+                                        <td>{moment(item.createdAt).format('M/D/YYYY')}</td>
                                         <td>{item.user?.name}</td>
                                         <td>{item.status || 'Pending'}</td>
+                                        <td>{moment(item.preferredDate).format('MM/D/YYYY')}</td>
                                         <td>
                                             <button
-                                                className="bg-blue-500 text-white rounded px-4 py-2 mx-1"
+                                                className=""
                                                 onClick={() => handleViewDetails(item)}
                                             >
-                                                View Details
+                                                <FaEye className='text-blue-500 h-5 w-5  drop-shadow-2xl hover:text-blue-800'/>
                                             </button>
                                         </td>
                                     </tr>
@@ -98,17 +101,18 @@ const Appointments = () => {
                         <div className="modal modal-open">
                             <div className="modal-box">
                                 <h3 className="font-bold text-lg">Appointment Details</h3>
-                                <p className="py-2"><strong>Patient Name:</strong> {selectedAppointment.user.name}</p>
-                                <div className="py-2"><strong>Service:</strong>
+                                <p className="py-1"><strong>Patient Name:</strong> {selectedAppointment.user.name}</p>
+                                <p className="py-1"><strong>Patient Address:</strong> {selectedAppointment.address}</p>
+                                <div className="py-1"><strong>Service:</strong>
                                     <ul className='pl-10'>
                                         {selectedAppointment.services.map((service, index) => (
                                             <li key={index}>{service.name}</li>
                                         ))}
                                     </ul>
                                 </div>
-                                <p className="py-2"><strong>Date:</strong> {moment(selectedAppointment.createdAt).format('MMMM D, YYYY')}</p>
-                                <p className="py-2"><strong>Status:</strong> {selectedAppointment.status}</p>
-                                <p className="py-2"><strong>Physiotherapist:</strong> {selectedAppointment.physiotherapist.name}</p>
+                                <p className="py-1"><strong>Preffered Date:</strong> {moment(selectedAppointment.preferredDate).format('MMMM D, YYYY')}</p>
+                                <p className="py-1"><strong>Status:</strong> {selectedAppointment.status}</p>
+                                <p className="py-1"><strong>Physiotherapist:</strong> {selectedAppointment.physiotherapist.name}</p>
 
                                 <div className="modal-action">
                                     <button

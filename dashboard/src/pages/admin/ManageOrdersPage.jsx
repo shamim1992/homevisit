@@ -11,7 +11,7 @@ const ManageOrdersPage = () => {
     const [physiotherapists, setPhysiotherapists] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedPhysiotherapist, setSelectedPhysiotherapist] = useState('');
-    const [filterMode, setFilterMode] = useState('all'); 
+    const [filterMode, setFilterMode] = useState('all');
     const token = localStorage.getItem('token');
 
     console.log(orders)
@@ -41,7 +41,7 @@ const ManageOrdersPage = () => {
                 console.error('Error fetching physiotherapists:', error);
             }
         };
-    
+
         fetchAllPhysiotherapists();
         fetchOrders();
     }, [token]);
@@ -61,10 +61,10 @@ const ManageOrdersPage = () => {
 
         try {
             const response = await axios.patch(
-                `http://localhost:5002/api/admin/order/${selectedOrder._id}/assign`, 
+                `http://localhost:5002/api/admin/order/${selectedOrder._id}/assign`,
                 {
-                    physioId: selectedPhysiotherapist ,
-                    
+                    physioId: selectedPhysiotherapist,
+
                 },
                 {
                     headers: {
@@ -72,10 +72,10 @@ const ManageOrdersPage = () => {
                     },
                 }
             );
-            
+
             console.log('Response from server:', response.data);
             if (response.status === 200) {
-                setOrders(orders.map(order => 
+                setOrders(orders.map(order =>
                     order._id === selectedOrder._id ? { ...order, physiotherapist: response.data.physiotherapist } : order
                 ));
                 toast.success('Physiotherapist assigned successfully');
@@ -88,8 +88,8 @@ const ManageOrdersPage = () => {
             toast.error('Failed to assign physiotherapist. Please try again.');
         }
     };
-    
-    
+
+
     const filteredOrders = orders.filter(order => {
         if (filterMode === 'assigned') {
             return order.status !== 'pending';
@@ -100,9 +100,9 @@ const ManageOrdersPage = () => {
     });
 
     const availablePhysiotherapists = selectedOrder
-        ? physiotherapists.filter(physio => 
+        ? physiotherapists.filter(physio =>
             physio.serviceAreas && physio.serviceAreas.includes(selectedOrder.pin)
-          )
+        )
         : [];
 
     return (
@@ -118,19 +118,19 @@ const ManageOrdersPage = () => {
                     <h2 className="text-2xl font-bold text-center">Manage Orders</h2>
 
                     <div className="btn-group my-4">
-                        <button 
+                        <button
                             className={`px-4 py-2 ${filterMode === 'all' ? 'bg-blue-500 text-white rounded' : ''}`}
                             onClick={() => setFilterMode('all')}
                         >
                             Show All Orders
                         </button>
-                        <button 
+                        <button
                             className={`px-4 py-2 ${filterMode === 'pending' ? 'bg-blue-500 text-white rounded' : ''}`}
                             onClick={() => setFilterMode('pending')}
                         >
                             Pending Orders
                         </button>
-                        <button 
+                        <button
                             className={`px-4 py-2 ${filterMode === 'assigned' ? 'bg-blue-500 text-white rounded' : ''}`}
                             onClick={() => setFilterMode('assigned')}
                         >
@@ -176,21 +176,27 @@ const ManageOrdersPage = () => {
                         <div className="modal modal-open">
                             <div className="modal-box">
                                 <h3 className="font-bold text-lg">Order Details</h3>
-                                <p className="py-2"><strong>Order ID:</strong> {selectedOrder._id}</p>
-                                <p className="py-2"><strong>User:</strong> {selectedOrder.user?.name}</p>
-                                <p className="py-2"><strong>Status:</strong> {selectedOrder.status}</p>
-                                <p className="py-2"><strong>Pin Code:</strong> {selectedOrder.pin}</p>
-                                <p className="py-2"><strong>Services:</strong> {selectedOrder.services.map(service => (
-                                    <span key={service._id}>{service.name}, </span>
-                                ))}</p>
-                                <p className="py-2"><strong>Assigned Physiotherapist:</strong> {selectedOrder.physiotherapist?.name || 'Not Assigned'}</p>
-                                <p className="py-2"><strong>Address:</strong> {selectedOrder.physiotherapist?.address || 'Not Assigned'}</p>
-                                <p className="py-2"><strong>Session Start Time: </strong> {selectedOrder.sessionStart? moment(selectedOrder?.sessionStart).format('MMMM D, YYYY - h:m:s A'):'Not Set'}
+                                <p className="py-1"><strong>Order ID:</strong> {selectedOrder._id}</p>
+                                <p className="py-1"><strong>Patinet Name: </strong> {selectedOrder.user?.name}</p>
+                                <p className="py-1"><strong>Patient Address: </strong> {selectedOrder.address}</p>
+
+                                <p className="py-1"><strong>Status: </strong> {selectedOrder.status}</p>
+                                <p className="py-1"><strong>Pin Code: </strong> {selectedOrder.pin}</p>
+                                <div className="py-1"><strong>Services: </strong> 
+                                <ul>
+                                    {selectedOrder.services.map(service => (
+                                        <li key={service._id}> {service.name} </li>
+                                    ))}
+                                </ul>
+                                </div>
+                                <p className="py-1"><strong>Assigned Physiotherapist:</strong> {selectedOrder.physiotherapist?.name || 'Not Assigned'}</p>
+                                <p className="py-1"><strong>Physiotherapist Address: </strong> {selectedOrder.physiotherapist?.address || 'Not Assigned'}</p>
+                                <p className="py-1"><strong>Session Start Time: </strong> {selectedOrder.sessionStart ? moment(selectedOrder.sessionStart).format('M/D/YY, h:mm A') : 'Not Set'}
                                 </p>
-                                <p className="py-2"><strong>Session End Time: </strong>  {selectedOrder.sessionEnd ? moment(selectedOrder?.sessionEnd).format('MMMM D, YYYY - h:mm:ss A') : 'Not Set'}
+                                <p className="py-1"><strong>Session End Time: </strong>  {selectedOrder.sessionEnd ? moment(selectedOrder?.sessionEnd).format('M/D/YY, h:mm A') : 'Not Set'}
 
                                 </p>
-                                
+
                                 <div className="mb-4">
                                     <label className="label">
                                         <span className="label-text">Assign Physiotherapist</span>

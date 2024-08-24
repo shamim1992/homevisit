@@ -10,6 +10,7 @@ const BookAppointment = () => {
         contact: '',
         pin: '',
         preferredDate: '',  
+        mobile: '',
     });
 
     const token = localStorage.getItem('token');
@@ -131,6 +132,19 @@ const BookAppointment = () => {
                         type="date"
                         name="preferredDate"
                         value={formData.preferredDate}
+                        onChange={handleChange}
+                        className="input input-bordered"
+                        required
+                    />
+                </div>
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text">Preferred Date</span>
+                    </label>
+                    <input
+                        type="text"
+                        name="mobile"
+                        value={formData.mobile}
                         onChange={handleChange}
                         className="input input-bordered"
                         required

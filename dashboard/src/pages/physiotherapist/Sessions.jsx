@@ -4,11 +4,14 @@ import Navbar from '../../components/physio/Navbar';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from '../../components/common/Modal';
+import { FaEye } from 'react-icons/fa';
 
 const Sessions = () => {
     const [sessions, setSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const token = localStorage.getItem('token');
+
+    console.log(selectedSession)
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -103,14 +106,14 @@ const Sessions = () => {
                                         <td>{session.user?.name}</td>
                                         <td>{session.services.map(service => service.name).join(', ')}</td>
                                         <td>{session.status}</td>
-                                        <td>{ moment(session.sessionStart).format('M-D-YY,h:mm A')}</td>
-                                        <td>{ moment(session.sessionEnd).format('M-D-YY,h:mm A')}</td>
+                                        <td>{session.sessionStart? moment(session.sessionStart).format('M-D-YY,h:mm A'):'Not Set'}</td>
+                                        <td>{session.sessionEnd? moment(session.sessionEnd).format('M-D-YY,h:mm A'): 'Not Set'}</td>
                                         <td>
                                             <button
-                                                className="bg-blue-500 text-white rounded px-4 py-2 mx-1"
+                                                className=""
                                                 onClick={() => handleViewDetails(session)}
                                             >
-                                                View Details
+                                               <FaEye className='text-blue-500 h-5 w-5'/>
                                             </button>
                                         </td>
                                     </tr>
@@ -121,10 +124,21 @@ const Sessions = () => {
 
                     {selectedSession && (
                         <Modal title="Session Details" onClose={handleCloseModal}>
-                            <p className="py-2"><strong>Patient Name:</strong> {selectedSession.user.name}</p>
-                            <p className="py-2"><strong>Service:</strong> {selectedSession.services.map(service => service.name).join(', ')}</p>
-                            <p className="py-2"><strong>Date:</strong> {moment(selectedSession.createdAt).format('MMMM D, YYYY')}</p>
-                            <p className="py-2"><strong>Status:</strong> {selectedSession.status}</p>
+                            <p className="py-1"><strong>Patient Name:</strong> {selectedSession.user.name}</p>
+                            <p className="py-1"><strong>Patient Address:</strong> {selectedSession.address}</p>
+                            <div className="py-1"><strong>Service:</strong> 
+                            <ul>
+                                {selectedSession.services.map((service, index) => (
+                                    <li key={index}>{service.name}</li>
+                                ))}
+                            </ul>
+                            </div>
+                            <p className="py-1"><strong>Date:</strong> {moment(selectedSession.createdAt).format('MMMM D, YYYY')}</p>
+                            <p className="py-1"><strong>Status:</strong> {selectedSession.status}</p>
+                            <p className="py-1"><strong>Physiotherapist:</strong> {selectedSession.physiotherapist.name}</p>
+                            <p className="py-1"><strong>Session Start:</strong> {selectedSession.sessionStart? moment(selectedSession.sessionStart).format('M-D-YY, h:mm A'):'Not Set'}</p>
+                            <p className="py-1"><strong>Session End:</strong> {selectedSession.sessionEnd? moment(selectedSession.sessionEnd).format('M-D-YY,h:mm A'): 'Not Set'}</p>
+
                             <div className="modal-action">
                                 {selectedSession.status === 'approved' && (
                                     <button
