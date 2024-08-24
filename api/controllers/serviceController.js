@@ -4,10 +4,10 @@ import { errorHandler } from '../utils/error.js';
 
 // Add a new service (Admin only)
 export const addService = async (req, res, next) => {
-    const { name, price, description, thumbnail } = req.body;
+    const { name, price, description } = req.body;
 
     try {
-        const newService = new Service({ name, price, description, thumbnail });
+        const newService = new Service({ name, price, description });
         const savedService = await newService.save();
         res.status(201).json(savedService);
     } catch (error) {

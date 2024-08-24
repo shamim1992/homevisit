@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route,  } from 'react-router-dom';
 
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -11,7 +11,6 @@ import ManagePhysiotherapistsPage from './pages/admin/ManagePhysiotherapistsPage
 import ManageServicesPage from './pages/admin/ManageServicesPage';
 import AssignOrderPage from './pages/admin/AssignOrderPage';
 import HomePage from './pages/home/HomePage';
-import { ToastContainer } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
 import Appointments from './pages/physiotherapist/Appointments';
@@ -22,6 +21,7 @@ import UserDash from './pages/users/UserDash';
 import Dashboard from './components/user/Dashboard';
 import Orders from './components/user/Orders';
 import Register from './pages/auth/Register';
+import Profile from './components/user/Profile';
 
 
 const App = () => {
@@ -39,6 +39,8 @@ const App = () => {
           <Route index element={<Dashboard />} />
         </Route>
         <Route path="/user/orders" element={<Orders />} />
+        <Route path="/user/profile" element={<Profile />} />
+        
 
         {/* physio routes */}
         <Route path="/physio/appointments" element={<Appointments />} />
@@ -56,7 +58,7 @@ const App = () => {
           <Route path="/admin/assign" element={<AssignOrderPage />} />
         </Route>
 
-        {/* admin routes */}
+  
 
 
 

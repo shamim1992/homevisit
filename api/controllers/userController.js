@@ -10,7 +10,6 @@ export const userRegistration = async (req, res, next) => {
         if (!username || !email || !password || username.trim() === '' || email.trim() === '' || password.trim() === '') {
             return next(errorHandler(400, 'Invalid username or email'));
         }
-
         const hashedPassword = bcryptjs.hashSync(password, 10);
         const newUser = new User({
             username,
@@ -58,8 +57,8 @@ export const userlogin = async (req, res, next) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            token,
-            password});
+            token
+            });
 
     } catch (error) {
         return next(errorHandler(500, error.message));
@@ -68,8 +67,9 @@ export const userlogin = async (req, res, next) => {
 
 
 export const userProfile = async (req, res, next) => {
+    console.log(req.params.id)
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.params.id);
         res.json(user);
     } catch (error) {
         next(errorHandler(500, error.message));
@@ -84,3 +84,34 @@ export const updateUserProfile = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 }
+
+export const changePassword = async (req, res, next) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return next(errorHandler(400, 'Please provide both current and new passwords'));
+    }
+
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return next(errorHandler(404, 'User not found'));
+        }
+
+        const isMatch = bcryptjs.compareSync(currentPassword, user.password);
+
+        if (!isMatch) {
+            return next(errorHandler(401, 'Current password is incorrect'));
+        }
+
+        const hashedNewPassword = bcryptjs.hashSync(newPassword, 10);
+        user.password = hashedNewPassword;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        return next(errorHandler(500, error.message));
+    }
+};

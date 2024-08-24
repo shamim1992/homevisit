@@ -103,8 +103,8 @@ const Sessions = () => {
                                         <td>{session.user?.name}</td>
                                         <td>{session.services.map(service => service.name).join(', ')}</td>
                                         <td>{session.status}</td>
-                                        <td>{ new Date(session.sessionStart).toLocaleTimeString()}</td>
-                                        <td>{ new Date(session.sessionEnd).toLocaleTimeString()}</td>
+                                        <td>{ moment(session.sessionStart).format('M-D-YY,h:mm A')}</td>
+                                        <td>{ moment(session.sessionEnd).format('M-D-YY,h:mm A')}</td>
                                         <td>
                                             <button
                                                 className="bg-blue-500 text-white rounded px-4 py-2 mx-1"

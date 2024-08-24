@@ -13,6 +13,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import physioRoutes from './routes/physioRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/physio', physioRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(process.env.PORT, ()=>{
     console.log("server is running")

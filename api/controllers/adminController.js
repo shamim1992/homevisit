@@ -79,9 +79,9 @@ export const viewUsers = async (req, res, next) => {
 export const viewOrders = async (req, res, next) => {
     try {
         const orders = await Order.find()
-            .populate('user', 'name email')
-            .populate('services', 'name price')
-            .populate('physiotherapist', 'name');
+            .populate('user')
+            .populate('services')
+            .populate('physiotherapist');
         res.status(200).json(orders);
     } catch (error) {
         next(errorHandler(500, error.message));
@@ -114,57 +114,17 @@ export const manageServices = async (req, res, next) => {
     }
 };
 
-// Assign order to physiotherapist
-// export const assignOrderToPhysio = async (req, res, next) => {
-//     const { id } = req.params; // order ID
-//     const { physioId } = req.body;
-//     try {
-//         const order = await Order.findByIdAndUpdate(id, { physiotherapist: physioId }, { new: true });
-//         res.status(200).json(order);
-//     } catch (error) {
-//         next(errorHandler(500, error.message));
-//     }
-// };
-
-// Assign order to physiotherapist
-// export const assignOrderToPhysio = async (req, res, next) => {
-//     const { id } = req.params; // order ID
-//     const { physioId } = req.body;
-
-//     try {
-//         // Ensure both IDs are provided
-//         if (!id || !physioId) {
-//             return next(errorHandler(400, 'Order ID and Physiotherapist ID are required'));
-//         }
-
-//         // Find the order and update the physiotherapist field
-//         const order = await Order.findByIdAndUpdate(
-//             id,
-//             { physiotherapist: physioId },
-//             { new: true }
-//         ).populate('physiotherapist', 'name');
-
-//         if (!order) {
-//             return next(errorHandler(404, 'Order not found'));
-//         }
-
-//         // Return the updated order
-//         res.status(200).json(order);
-//     } catch (error) {
-//         next(errorHandler(500, error.message));
-//     }
-// };
-
 // Assign order to physiotherapist based on pin code
 export const assignOrderToPhysioByPin = async (req, res, next) => {
     const { id } = req.params; // order ID
-    const { pinCode } = req.body; // User-provided pin code
+    const { physioId } = req.body; // User-provided pin code
+
 
     try {
         // Find physiotherapists who serve the given pin code
         const availablePhysios = await User.find({
             role: 'physiotherapist',
-            serviceAreas: pinCode
+            // serviceAreas: pinCode
         });
 
         if (availablePhysios.length === 0) {
@@ -173,11 +133,11 @@ export const assignOrderToPhysioByPin = async (req, res, next) => {
 
         // Logic to assign a physiotherapist (e.g., based on availability or manual selection by admin)
         // For example, let's just assign the first one available
-        const physioId = availablePhysios[0]._id;
+        // const physioId = availablePhysios[0]._id;
 
         const order = await Order.findByIdAndUpdate(id, {
             physiotherapist: physioId
-        }, { new: true }).populate('physiotherapist', 'name');
+        }, { new: true }).populate('physiotherapist');
 
         if (!order) {
             return next(errorHandler(404, 'Order not found'));
@@ -195,7 +155,7 @@ export const assignOrderToPhysioByPin = async (req, res, next) => {
 // View all physiotherapists
 export const viewPhysiotherapists = async (req, res, next) => {
     try {
-        const physiotherapists = await User.find({ role: 'physiotherapist' }).select('name email');
+        const physiotherapists = await User.find({ role: 'physiotherapist' });
         res.status(200).json(physiotherapists);
     } catch (error) {
         next(errorHandler(500, error.message));

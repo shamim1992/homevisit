@@ -1,7 +1,22 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { signoutSuccess } from '../../app/users/userSlice';
 
 const Navbar = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch()
+
+    const handleLogout = () => {
+        // Clear the token from localStorage
+        localStorage.removeItem('token');
+
+        // Optionally clear any other user-related data from localStorage or context
+dispatch(signoutSuccess())
+        // Redirect the user to the login page
+        navigate('/login');
+    };
+
     return (
         <div className="navbar w-full shadow-md">
             <div className="flex-1">
@@ -10,7 +25,7 @@ const Navbar = () => {
             <div className="flex-none">
                 <div className="dropdown dropdown-end lg:hidden">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-                        <div className="indicator ">
+                        <div className="indicator">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 className="h-5 w-5"
@@ -23,7 +38,6 @@ const Navbar = () => {
                                     strokeWidth="2"
                                     d="M4 6h16M4 12h8m-8 6h16" />
                             </svg>
-                            {/* <span className="badge badge-sm indicator-item">8</span> */}
                         </div>
                     </div>
                     <div
@@ -44,7 +58,7 @@ const Navbar = () => {
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
                             <img
-                                alt="Tailwind CSS Navbar component"
+                                alt="Profile"
                                 src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
                         </div>
                     </div>
@@ -58,12 +72,12 @@ const Navbar = () => {
                             </a>
                         </li>
                         <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
+                        <li><button onClick={handleLogout}>Logout</button></li>
                     </ul>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default Navbar
+export default Navbar;

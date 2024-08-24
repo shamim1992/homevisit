@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/admin/Sidebar';
 import Navbar from '../../components/admin/Navbar';
+
 const ManageServicesPage = () => {
     const [services, setServices] = useState([]);
     const [editingService, setEditingService] = useState(null);
     const [serviceData, setServiceData] = useState({ name: '', price: '', description: '' });
+    const [newService, setNewService] = useState({ name: '', price: '', description: '' });
 
     // Fetch token from localStorage
     const token = localStorage.getItem('token');
+
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -51,7 +54,11 @@ const ManageServicesPage = () => {
     const handleInputChange = (e) => {
         setServiceData({ ...serviceData, [e.target.name]: e.target.value });
     };
-    
+
+    const handleNewServiceChange = (e) => {
+        setNewService({ ...newService, [e.target.name]: e.target.value });
+    };
+
     const saveEdit = async (id) => {
         try {
             await axios.put(`http://localhost:5002/api/services/${id}`, serviceData, {
@@ -65,17 +72,74 @@ const ManageServicesPage = () => {
             console.error('Error updating service:', error);
         }
     };
+
+    const addService = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:5002/api/services', newService, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setServices([...services, response.data]);
+            setNewService({ name: '', price: '', description: '' });
+        } catch (error) {
+            console.error('Error adding service:', error);
+        }
+    };
+
     return (
         <div className="min-h-screen flex">
-            <div className='min-h-screen w-60 bg-black text-white hidden md:block'>
+            <div className='min-h-screen w-60 bg-black text-white hidden md:block '>
                 <Sidebar />
             </div>
             <div className='flex-1'>
                 <Navbar />
                 <div className="p-6">
                     <h2 className="text-2xl font-bold text-center">Manage Services</h2>
-                    <div className="overflow-x-auto">
-                        <table className="table shadow-md">
+                    <div className="max-w-md shadow-md p-4 rounded-xl mb-10">
+                        {/* Add Service Form */}
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold mb-4">Add New Service</h3>
+                        <form onSubmit={addService}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={newService.name}
+                                    onChange={handleNewServiceChange}
+                                    className="input input-bordered w-full"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Price</label>
+                                <input
+                                    type="text"
+                                    name="price"
+                                    value={newService.price}
+                                    onChange={handleNewServiceChange}
+                                    className="input input-bordered w-full"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Description</label>
+                                <textarea
+                                    name="description"
+                                    value={newService.description}
+                                    onChange={handleNewServiceChange}
+                                    className="textarea textarea-bordered w-full"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn btn-primary">Add Service</button>
+                        </form>
+                    </div>
+                    </div>
+                    <div className="overflow-x-auto mb-6">
+                        <table className="table shadow-md w-full">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -164,6 +228,8 @@ const ManageServicesPage = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    
                 </div>
             </div>
         </div>

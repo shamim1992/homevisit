@@ -1,13 +1,15 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { signoutSuccess } from '../../app/users/userSlice';
 
 const Navbar = () => {
     const navigate = useNavigate();
-
+const dispatch = useDispatch()
     const handleLogout = () => {
         localStorage.removeItem('token'); 
-        localStorage.removeItem('user');  // Remove user data from local storage
-
+        localStorage.removeItem('user');  
+        dispatch(signoutSuccess());
         navigate('/login');
     };
 

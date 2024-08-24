@@ -9,7 +9,7 @@ const BookAppointment = () => {
         address: '',
         contact: '',
         pin: '',
-        preferredDate: '',  // Added preferredDate to the form data
+        preferredDate: '',  
     });
 
     const token = localStorage.getItem('token');
@@ -68,8 +68,8 @@ const BookAppointment = () => {
     };
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Book an Appointment</h2>
+        <div className="p-6 max-w-xl mx-auto">
+            <h2 className="text-2xl font-bold mb-4 mx-auto">Book an Appointment</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-control">
                     <label className="label">
@@ -137,8 +137,9 @@ const BookAppointment = () => {
                     />
                 </div>
 
-                <div className="form-control mt-4">
-                    <h3 className="font-bold mb-2">Select Services</h3>
+                <h3 className="font-bold my-2">Select Services</h3>
+                <div className="form-control mt-4 flex flex-row flex-wrap gap-3">
+                    
                     {services.map(service => (
                         <div key={service._id} className="flex items-center mb-2">
                             <input
