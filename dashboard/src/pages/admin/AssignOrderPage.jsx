@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/admin/Sidebar';
 import Navbar from '../../components/admin/Navbar';
+import { apiUrl } from '../../AppUrl';
 
 const AssignOrderPage = () => {
     const [orders, setOrders] = useState([]);
@@ -13,7 +14,7 @@ const AssignOrderPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/orders', {
+                const response = await axios.get(`${apiUrl}/api/admin/orders`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -26,7 +27,7 @@ const AssignOrderPage = () => {
 
         const fetchPhysiotherapists = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/physiotherapists', {
+                const response = await axios.get(`${apiUrl}/api/admin/physiotherapists`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -44,7 +45,7 @@ const AssignOrderPage = () => {
     const handleAssign = async () => {
         try {
             await axios.post(
-                `http://localhost:5002/api/admin/assign/${selectedOrder}`,
+                `${apiUrl}/api/admin/assign/${selectedOrder}`,
                 {
                     physioId: selectedPhysiotherapist
                 },

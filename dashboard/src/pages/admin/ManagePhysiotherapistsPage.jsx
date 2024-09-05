@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/admin/Sidebar';
 import Navbar from '../../components/admin/Navbar';
+import { apiUrl } from '../../AppUrl';
 
 const ManagePhysiotherapistsPage = () => {
     const [physiotherapists, setPhysiotherapists] = useState([]);
@@ -73,7 +74,7 @@ const ManagePhysiotherapistsPage = () => {
     const handleDeletePhysio = async (id) => {
         if (window.confirm('Are you sure you want to delete this physiotherapist?')) {
             try {
-                await axios.delete(`http://localhost:5002/api/admin/physiotherapists/${id}`, {
+                await axios.delete(`${apiUrl}/api/admin/physiotherapists/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -91,7 +92,7 @@ const ManagePhysiotherapistsPage = () => {
 
             if (currentPhysio) {
                 // Update existing physiotherapist
-                await axios.put(`http://localhost:5002/api/admin/physiotherapists/${currentPhysio._id}`, {
+                await axios.put(`${apiUrl}/api/admin/physiotherapists/${currentPhysio._id}`, {
                     name, email, username, phone, address, dateOfBirth, serviceAreas: serviceAreasArray, state, district, city
                 }, {
                     headers: {
@@ -100,7 +101,7 @@ const ManagePhysiotherapistsPage = () => {
                 });
             } else {
                 // Add new physiotherapist
-                const response = await axios.post('http://localhost:5002/api/admin/physiotherapists', {
+                const response = await axios.post(`${apiUrl}/api/admin/physiotherapists`, {
                     name, email, username, password, phone, address, dateOfBirth, serviceAreas: serviceAreasArray, state, district, city
                 }, {
                     headers: {

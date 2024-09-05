@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import Sidebar from '../common/Sidebar'; // Import the Sidebar component (create it if it doesn't exist)
-import Navbar from '../common/Navbar'; // Assuming Navbar is common
+import Sidebar from '../common/Sidebar'; 
+import Navbar from '../common/Navbar'; 
+import { apiUrl } from '../../AppUrl';
 
 const Orders = () => {
     const [orders, setOrders] = useState([]);
@@ -12,7 +13,7 @@ const Orders = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/orders/myorders', {
+                const response = await axios.get(`${apiUrl}/api/orders/myorders`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

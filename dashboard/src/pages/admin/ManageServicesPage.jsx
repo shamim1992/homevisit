@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/admin/Sidebar';
 import Navbar from '../../components/admin/Navbar';
+import { apiUrl } from '../../AppUrl';
 
 const ManageServicesPage = () => {
     const [services, setServices] = useState([]);
@@ -61,7 +62,7 @@ const ManageServicesPage = () => {
 
     const saveEdit = async (id) => {
         try {
-            await axios.put(`http://localhost:5002/api/services/${id}`, serviceData, {
+            await axios.put(`${apiUrl}/api/services/${id}`, serviceData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -76,7 +77,7 @@ const ManageServicesPage = () => {
     const addService = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5002/api/services', newService, {
+            const response = await axios.post(`${apiUrl}/api/services`, newService, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

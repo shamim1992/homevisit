@@ -10,10 +10,7 @@ const Navbar = () => {
     const handleLogout = () => {
         // Clear the token from localStorage
         localStorage.removeItem('token');
-
-        // Optionally clear any other user-related data from localStorage or context
-dispatch(signoutSuccess())
-        // Redirect the user to the login page
+        dispatch(signoutSuccess());
         navigate('/login');
     };
 

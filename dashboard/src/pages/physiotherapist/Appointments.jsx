@@ -4,16 +4,17 @@ import Navbar from '../../components/physio/Navbar';
 import axios from 'axios';
 import moment from 'moment';
 import { FaEye } from "react-icons/fa";
+import { apiUrl } from '../../AppUrl';
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const token = localStorage.getItem('token');
-console.log(selectedAppointment)
+
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/physio/appointments', {
+                const response = await axios.get(`${apiUrl}/api/physio/appointments`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -38,7 +39,7 @@ console.log(selectedAppointment)
     const updateAppointmentStatus = async (id, status) => {
         try {
             await axios.put(
-                `http://localhost:5002/api/physio/order/${id}/approve`,
+                `${apiUrl}/api/physio/order/${id}/approve`,
                 { status },
                 {
                     headers: {
@@ -79,16 +80,16 @@ console.log(selectedAppointment)
                             <tbody>
                                 {appointments.map((item) => (
                                     <tr key={item._id}>
-                                        <td>{moment(item.createdAt).format('M/D/YYYY')}</td>
+                                        <td>{moment(item.createdAt).format('DD/MM/YYYY')}</td>
                                         <td>{item.user?.name}</td>
                                         <td>{item.status || 'Pending'}</td>
-                                        <td>{moment(item.preferredDate).format('MM/D/YYYY')}</td>
+                                        <td>{moment(item.preferredDate).format('DD/MM/YYYY')}</td>
                                         <td>
                                             <button
                                                 className=""
                                                 onClick={() => handleViewDetails(item)}
                                             >
-                                                <FaEye className='text-blue-500 h-5 w-5  drop-shadow-2xl hover:text-blue-800'/>
+                                                <FaEye className='text-blue-500 h-5 w-5  drop-shadow-2xl hover:text-blue-800' />
                                             </button>
                                         </td>
                                     </tr>
@@ -102,7 +103,11 @@ console.log(selectedAppointment)
                             <div className="modal-box">
                                 <h3 className="font-bold text-lg">Appointment Details</h3>
                                 <p className="py-1"><strong>Patient Name:</strong> {selectedAppointment.user.name}</p>
-                                <p className="py-1"><strong>Patient Address:</strong> {selectedAppointment.address}</p>
+                                {
+                                    selectedAppointment.status === 'completed' ? '' : <><p className="py-1"><strong>Patient Address:</strong> {selectedAppointment.address}</p>
+                                        <p className="py-1"><strong>Patient Contact:</strong> {selectedAppointment.mobile}</p></>
+                                }
+                                <div className="py-1"><strong>Prescription:</strong> <a href={selectedAppointment.prescription != null ? apiUrl + '/uploads/' + selectedAppointment.prescription : '#'} target='_blank' className='text-blue-500'>View</a></div>
                                 <div className="py-1"><strong>Service:</strong>
                                     <ul className='pl-10'>
                                         {selectedAppointment.services.map((service, index) => (
@@ -119,14 +124,14 @@ console.log(selectedAppointment)
                                         className="btn btn-success"
                                         onClick={() => updateAppointmentStatus(selectedAppointment._id, 'approved')}
                                     >
-                                        Approve
+                                        Accept
                                     </button>
-                                    <button
+                                    {/* <button
                                         className="btn btn-danger"
                                         onClick={() => updateAppointmentStatus(selectedAppointment._id, 'disapproved')}
                                     >
                                         Disapprove
-                                    </button>
+                                    </button> */}
                                     <button className="btn" onClick={handleCloseModal}>
                                         Close
                                     </button>

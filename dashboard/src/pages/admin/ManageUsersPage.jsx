@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../../components/admin/Sidebar';
 import Navbar from '../../components/admin/Navbar';
+import { apiUrl } from '../../AppUrl';
 
 const ManageUsersPage = () => {
     const [users, setUsers] = useState([]);
@@ -12,7 +13,7 @@ const ManageUsersPage = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/users', {
+                const response = await axios.get(`${apiUrl}/api/admin/users`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -28,7 +29,7 @@ const ManageUsersPage = () => {
 
     const handleRoleChange = async (userId, newRole) => {
         try {
-            await axios.put(`http://localhost:5002/api/admin/users/${userId}/role`, { role: newRole }, {
+            await axios.put(`${apiUrl}/api/admin/users/${userId}/role`, { role: newRole }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -44,7 +45,7 @@ const ManageUsersPage = () => {
     const handleDelete = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.delete(`http://localhost:5002/api/admin/users/${userId}`, {
+                const response = await axios.delete(`${apiUrl}/api/admin/users/${userId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

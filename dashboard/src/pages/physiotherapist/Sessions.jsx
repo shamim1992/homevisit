@@ -5,6 +5,7 @@ import axios from 'axios';
 import moment from 'moment';
 import Modal from '../../components/common/Modal';
 import { FaEye } from 'react-icons/fa';
+import { apiUrl } from '../../AppUrl';
 
 const Sessions = () => {
     const [sessions, setSessions] = useState([]);
@@ -16,7 +17,7 @@ const Sessions = () => {
     useEffect(() => {
         const fetchSessions = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/physio/appointments', {
+                const response = await axios.get(`${apiUrl}/api/physio/appointments`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -42,7 +43,7 @@ const Sessions = () => {
     const handleStartSession = async (sessionId) => {
         try {
             const response = await axios.patch(
-                `http://localhost:5002/api/physio/session/${sessionId}/start`,
+                `${apiUrl}/api/physio/session/${sessionId}/start`,
                 {},
                 {
                     headers: {
@@ -62,7 +63,7 @@ const Sessions = () => {
     const handleEndSession = async (sessionId) => {
         try {
             const response = await axios.patch(
-                `http://localhost:5002/api/physio/session/${sessionId}/end`,
+                `${apiUrl}/api/physio/session/${sessionId}/end`,
                 {},
                 {
                     headers: {
@@ -125,17 +126,22 @@ const Sessions = () => {
                     {selectedSession && (
                         <Modal title="Session Details" onClose={handleCloseModal}>
                             <p className="py-1"><strong>Patient Name:</strong> {selectedSession.user.name}</p>
-                            <p className="py-1"><strong>Patient Address:</strong> {selectedSession.address}</p>
-                            <div className="py-1"><strong>Service:</strong> 
+                            {
+                               selectedSession.status === 'completed' ? '': <><p className="py-1"><strong>Patient Address:</strong> {selectedSession.address}</p>
+                            <p className="py-1"><strong>Patient Contact:</strong> {selectedSession.mobile}</p></>
+                            }
+                            
+                            <div className="py-1"><strong>Services:</strong> 
                             <ul>
                                 {selectedSession.services.map((service, index) => (
                                     <li key={index}>{service.name}</li>
                                 ))}
                             </ul>
                             </div>
-                            <p className="py-1"><strong>Date:</strong> {moment(selectedSession.createdAt).format('MMMM D, YYYY')}</p>
+                            <p className="py-1"><strong>Session Date:</strong> {moment(selectedSession.preferredDate).format('D MMMM,YYYY')}</p>
                             <p className="py-1"><strong>Status:</strong> {selectedSession.status}</p>
                             <p className="py-1"><strong>Physiotherapist:</strong> {selectedSession.physiotherapist.name}</p>
+                            <div className="py-1"><strong>Prescription:</strong> <a href={selectedSession.prescription != null ? apiUrl+'/uploads/'+selectedSession.prescription : '#'} target='_blank' className='text-blue-500'>View</a></div>
                             <p className="py-1"><strong>Session Start:</strong> {selectedSession.sessionStart? moment(selectedSession.sessionStart).format('M-D-YY, h:mm A'):'Not Set'}</p>
                             <p className="py-1"><strong>Session End:</strong> {selectedSession.sessionEnd? moment(selectedSession.sessionEnd).format('M-D-YY,h:mm A'): 'Not Set'}</p>
 

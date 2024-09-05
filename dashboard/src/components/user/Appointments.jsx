@@ -5,6 +5,7 @@ import Navbar from '../common/Navbar';
 import axios from 'axios';
 import moment from 'moment';
 import Modal from '../common/Modal';
+import { apiUrl } from '../../AppUrl';
 
 const Appointments = () => {
     const [appointments, setAppointments] = useState([]);
@@ -14,7 +15,7 @@ const Appointments = () => {
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/user/appointments', {
+                const response = await axios.get(`${apiUrl}/api/user/appointments`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

@@ -5,6 +5,7 @@ import Navbar from '../../components/admin/Navbar';
 import moment from 'moment';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { apiUrl } from '../../AppUrl';
 
 const ManageOrdersPage = () => {
     const [orders, setOrders] = useState([]);
@@ -61,7 +62,7 @@ const ManageOrdersPage = () => {
 
         try {
             const response = await axios.patch(
-                `http://localhost:5002/api/admin/order/${selectedOrder._id}/assign`,
+                `${apiUrl}/api/admin/order/${selectedOrder._id}/assign`,
                 {
                     physioId: selectedPhysiotherapist,
 
@@ -179,9 +180,10 @@ const ManageOrdersPage = () => {
                                 <p className="py-1"><strong>Order ID:</strong> {selectedOrder._id}</p>
                                 <p className="py-1"><strong>Patinet Name: </strong> {selectedOrder.user?.name}</p>
                                 <p className="py-1"><strong>Patient Address: </strong> {selectedOrder.address}</p>
-
+                                <p className="py-1"><strong>Mobile: </strong> {selectedOrder.mobile}</p>
                                 <p className="py-1"><strong>Status: </strong> {selectedOrder.status}</p>
                                 <p className="py-1"><strong>Pin Code: </strong> {selectedOrder.pin}</p>
+                                <p className="py-1"><strong>Prescription: </strong><a href={selectedOrder.prescription != null ? apiUrl+'/uploads/'+selectedOrder.prescription : '#'} target='_blank' className='text-blue-500'>View</a> </p>
                                 <div className="py-1"><strong>Services: </strong> 
                                 <ul>
                                     {selectedOrder.services.map(service => (

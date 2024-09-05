@@ -22,6 +22,10 @@ import Dashboard from './components/user/Dashboard';
 import Orders from './components/user/Orders';
 import Register from './pages/auth/Register';
 import Profile from './components/user/Profile';
+import AboutPage from './pages/home/AboutPage';
+import ServicePage from './pages/home/ServicePage';
+import ContactUs from './pages/home/ContactUs';
+import Appointment from './pages/home/Appointment';
 
 
 const App = () => {
@@ -33,6 +37,10 @@ const App = () => {
       <Routes>
 
         <Route path='/' element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/service" element={<ServicePage />} />
+        <Route path='/contact' element={<ContactUs />} />
+        <Route path='/appointment' element={<Appointment />} />
         <Route path="/login" element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path="/user/dashboard" element={<UserDash />}>

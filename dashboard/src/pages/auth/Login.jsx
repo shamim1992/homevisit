@@ -3,6 +3,7 @@ import axios from 'axios';
 import { signInFailure, signInStart, signInSuccess } from '../../app/users/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../../components/Home/Navbar';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -55,6 +56,8 @@ const Login = () => {
 
 
     return (
+        <>
+        <Navbar/>
         <div className="hero min-h-screen bg-base-200">
             <div className="hero-content flex-col lg:flex-row">
                 <div className="text-center lg:text-left">
@@ -100,6 +103,8 @@ const Login = () => {
                 </div>
             </div>
         </div>
+        </>
+        
     )
 }
 

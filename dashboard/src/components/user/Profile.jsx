@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
 import moment from 'moment';
+import { apiUrl } from '../../AppUrl';
 
 const Profile = () => {
     const [user, setUser] = useState(null);
@@ -15,7 +16,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get(`http://localhost:5002/api/users/profile/${currentUser._id}`, {
+                const response = await axios.get(`${apiUrl}/api/users/profile/${currentUser._id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
