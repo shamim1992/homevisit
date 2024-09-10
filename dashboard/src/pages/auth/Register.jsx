@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '../../components/Home/Navbar';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { apiUrl } from '../../AppUrl';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5002/api/auth/register', formData);
+            const response = await axios.post(`${apiUrl}/api/auth/register`, formData);
             console.log('Registration successful:', response.data);
 
             // Clear all fields
@@ -139,9 +140,9 @@ const Register = () => {
 
                             <div className='flex flex-col lg:flex-row gap-6 items-center'>
                                 <div className="form-control w-full">
-                                    {/* <label className="label">
+                                    <label className="label">
                                         <span className="label-text">Phone</span>
-                                    </label> */}
+                                    </label>
                                     <input
                                         type="text"
                                         name="phone"

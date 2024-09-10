@@ -1,84 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/physio/Sidebar';
-import Navbar from '../../components/physio/Navbar';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import Modal from '../../components/common/Modal';
 import { FaEye } from 'react-icons/fa';
+import Sidebar from '../../components/physio/Sidebar';
+import Navbar from '../../components/physio/Navbar';
+import Modal from '../../components/common/Modal';
 import { apiUrl } from '../../AppUrl';
+import { toast } from 'react-toastify';
 
 const Sessions = () => {
-    const [sessions, setSessions] = useState([]);
-    const [selectedSession, setSelectedSession] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [sessionToStart, setSessionToStart] = useState(null);
     const token = localStorage.getItem('token');
 
-    console.log(selectedSession)
-
-    useEffect(() => {
-        const fetchSessions = async () => {
-            try {
-                const response = await axios.get(`${apiUrl}/api/physio/appointments`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    params: { status: 'approved' }, 
-                });
-                setSessions(response.data);
-            } catch (error) {
-                console.error('Error fetching sessions:', error);
-            }
-        };
-
-        fetchSessions();
+    const fetchOrders = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await axios.get(`${apiUrl}/api/physio/appointments`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: { status: 'approved' },
+            });
+            setOrders(response.data);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            setError('Failed to fetch orders. Please try again.');
+            toast.error('Failed to fetch orders. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     }, [token]);
 
-    const handleViewDetails = (session) => {
-        setSelectedSession(session);
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
+
+    const handleViewDetails = (order) => {
+        setSelectedOrder(order);
     };
 
     const handleCloseModal = () => {
-        setSelectedSession(null);
+        setSelectedOrder(null);
     };
 
-    const handleStartSession = async (sessionId) => {
+    const handleSessionAction = async (orderId, sessionIndex, action) => {
+        if (action === 'start') {
+            setSessionToStart({ orderId, sessionIndex });
+            setShowConfirmation(true);
+        } else {
+            await performSessionAction(orderId, sessionIndex, action);
+        }
+    };
+
+    const performSessionAction = async (orderId, sessionIndex, action) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await axios.patch(
-                `${apiUrl}/api/physio/session/${sessionId}/start`,
-                {},
+            const response = await axios.put(
+                `${apiUrl}/api/orders/update-session`,
+                {
+                    orderId,
+                    sessionIndex,
+                    status: action === 'start' ? 'in-progress' : 'completed',
+                    sessionStart: action === 'start' ? new Date().toISOString() : undefined,
+                    sessionEnd: action === 'end' ? new Date().toISOString() : undefined,
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             );
-            setSessions(sessions.map(session =>
-                session._id === sessionId ? { ...session, status: 'in-progress', sessionStart: response.data.sessionStart } : session
-            ));
-            handleCloseModal();
+        
+            if (response.data && response.data.order) {
+                setOrders(prevOrders => 
+                    prevOrders.map(order =>
+                        order._id === orderId ? response.data.order : order
+                    )
+                );
+                setSelectedOrder(response.data.order);
+                toast.success(`Session ${action === 'start' ? 'started' : 'ended'} successfully`);
+            } else {
+                throw new Error('Invalid response from server');
+            }
         } catch (error) {
-            console.error('Error starting session:', error);
+            console.error(`Error ${action}ing session:`, error);
+            setError(`Failed to ${action} session. Please try again.`);
+            toast.error(`Failed to ${action} session. Please try again.`);
+        } finally {
+            setLoading(false);
+            setShowConfirmation(false);
         }
     };
 
-    const handleEndSession = async (sessionId) => {
-        try {
-            const response = await axios.patch(
-                `${apiUrl}/api/physio/session/${sessionId}/end`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setSessions(sessions.map(session =>
-                session._id === sessionId ? { ...session, status: 'completed', sessionEnd: response.data.sessionEnd } : session
-            ));
-            handleCloseModal();
-        } catch (error) {
-            console.error('Error ending session:', error);
+    const handleConfirmStart = () => {
+        if (sessionToStart) {
+            performSessionAction(sessionToStart.orderId, sessionToStart.sessionIndex, 'start');
         }
     };
+
+    const handleCancelStart = () => {
+        setShowConfirmation(false);
+        setSessionToStart(null);
+    };
+
+    const renderSessionStatus = (session) => {
+        switch(session.status) {
+            case 'scheduled':
+                return <span className="text-blue-500">Scheduled</span>;
+            case 'in-progress':
+                return <span className="text-yellow-500">In Progress</span>;
+            case 'completed':
+                return <span className="text-green-500">Completed</span>;
+            case 'canceled':
+                return <span className="text-red-500">Canceled</span>;
+            default:
+                return session.status;
+        }
+    };
+
+    if (loading && orders.length === 0) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     return (
         <div className="flex">
@@ -86,35 +139,30 @@ const Sessions = () => {
             <div className="flex-1">
                 <Navbar />
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-4">Approved Sessions</h2>
+                    <h2 className="text-2xl font-bold mb-4">Approved Orders</h2>
                     <div className="overflow-x-auto">
                         <table className="table w-full">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Booking Date</th>
                                     <th>Patient</th>
                                     <th>Service</th>
                                     <th>Status</th>
-                                    <th>Start Session</th>
-                                    <th>End Session</th>
+                                    <th>Completed / Total Sessions</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {sessions.map((session) => (
-                                    <tr key={session._id}>
-                                        <td>{moment(session.createdAt).format('MMMM D, YYYY')}</td>
-                                        <td>{session.user?.name}</td>
-                                        <td>{session.services.map(service => service.name).join(', ')}</td>
-                                        <td>{session.status}</td>
-                                        <td>{session.sessionStart? moment(session.sessionStart).format('M-D-YY,h:mm A'):'Not Set'}</td>
-                                        <td>{session.sessionEnd? moment(session.sessionEnd).format('M-D-YY,h:mm A'): 'Not Set'}</td>
+                                {orders.map((order) => (
+                                    <tr key={order._id}>
+                                        <td>{moment(order.createdAt).format('MMMM D, YYYY')}</td>
+                                        <td>{order.user?.name}</td>
+                                        <td>{order.services.map(service => service.name).join(', ')}</td>
+                                        <td>{order.status}</td>
+                                        <td>{order.completedSessions} / {order.totalSessions}</td>
                                         <td>
-                                            <button
-                                                className=""
-                                                onClick={() => handleViewDetails(session)}
-                                            >
-                                               <FaEye className='text-blue-500 h-5 w-5'/>
+                                            <button onClick={() => handleViewDetails(order)}>
+                                                <FaEye className='text-blue-500 h-5 w-5' />
                                             </button>
                                         </td>
                                     </tr>
@@ -123,48 +171,86 @@ const Sessions = () => {
                         </table>
                     </div>
 
-                    {selectedSession && (
-                        <Modal title="Session Details" onClose={handleCloseModal}>
-                            <p className="py-1"><strong>Patient Name:</strong> {selectedSession.user.name}</p>
-                            {
-                               selectedSession.status === 'completed' ? '': <><p className="py-1"><strong>Patient Address:</strong> {selectedSession.address}</p>
-                            <p className="py-1"><strong>Patient Contact:</strong> {selectedSession.mobile}</p></>
-                            }
-                            
-                            <div className="py-1"><strong>Services:</strong> 
+                    {selectedOrder && (
+                        <Modal title="Order Details" onClose={handleCloseModal}>
+                            <p className="py-1"><strong>Patient Name:</strong> {selectedOrder.user.name}</p>
+                            <p className="py-1"><strong>Patient Address:</strong> {selectedOrder.address}</p>
+                            <p className="py-1"><strong>Patient Contact:</strong> {selectedOrder.mobile}</p>
+                            <p><strong>Preferred Date:</strong> {moment(selectedOrder.preferredDate).format('M-D-YY')}</p>
+                            <div className="py-1"><strong>Services:</strong>
+                                <ul>
+                                    {selectedOrder.services.map((service, index) => (
+                                        <li key={index}>{service.name}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <h3 className="text-xl font-bold mt-4 mb-2">Sessions</h3>
+                            <table className="table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Session #</th>
+                                        <th>Status</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {selectedOrder.sessions.map((session, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{renderSessionStatus(session)}</td>
+                                            <td>{session.sessionStart ? moment(session.sessionStart).format('M-D-YY, h:mm A') : 'Not Started'}</td>
+                                            <td>{session.sessionEnd ? moment(session.sessionEnd).format('M-D-YY, h:mm A') : 'Not Ended'}</td>
+                                            <td>
+                                                {session.status === 'scheduled' && (
+                                                    <button
+                                                        className="text-xs px-4 py-2 bg-blue-500 text-white rounded-full"
+                                                        onClick={() => handleSessionAction(selectedOrder._id, index, 'start')}
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? 'Starting...' : 'Start'}
+                                                    </button>
+                                                )}
+                                                {session.status === 'in-progress' && (
+                                                    <button
+                                                        className="text-xs px-4 py-2 bg-red-700 text-white rounded-full"
+                                                        onClick={() => handleSessionAction(selectedOrder._id, index, 'end')}
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? 'Ending...' : 'End'}
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </Modal>
+                    )}
+
+                    {showConfirmation && (
+                        <Modal title="Confirm Session Start" onClose={handleCancelStart}>
+                            <p>Are you sure you want to start this session?</p>
+                            <p><strong>Services to be performed:</strong></p>
                             <ul>
-                                {selectedSession.services.map((service, index) => (
+                                {selectedOrder.services.map((service, index) => (
                                     <li key={index}>{service.name}</li>
                                 ))}
                             </ul>
-                            </div>
-                            <p className="py-1"><strong>Session Date:</strong> {moment(selectedSession.preferredDate).format('D MMMM,YYYY')}</p>
-                            <p className="py-1"><strong>Status:</strong> {selectedSession.status}</p>
-                            <p className="py-1"><strong>Physiotherapist:</strong> {selectedSession.physiotherapist.name}</p>
-                            <div className="py-1"><strong>Prescription:</strong> <a href={selectedSession.prescription != null ? apiUrl+'/uploads/'+selectedSession.prescription : '#'} target='_blank' className='text-blue-500'>View</a></div>
-                            <p className="py-1"><strong>Session Start:</strong> {selectedSession.sessionStart? moment(selectedSession.sessionStart).format('M-D-YY, h:mm A'):'Not Set'}</p>
-                            <p className="py-1"><strong>Session End:</strong> {selectedSession.sessionEnd? moment(selectedSession.sessionEnd).format('M-D-YY,h:mm A'): 'Not Set'}</p>
-
-                            <div className="modal-action">
-                                {selectedSession.status === 'approved' && (
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => handleStartSession(selectedSession._id)}
-                                    >
-                                        Start Session
-                                    </button>
-                                )}
-                                {selectedSession.status === 'in-progress' && (
-                                    <button
-                                        className="btn btn-primary"
-                                        onClick={() => handleEndSession(selectedSession._id)}
-                                    >
-                                        End Session
-                                    </button>
-                                )}
-                                {/* <button className="btn" onClick={handleCloseModal}>
-                                    Close
-                                </button> */}
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    className="px-4 py-2 bg-gray-300 text-black rounded-full mr-2"
+                                    onClick={handleCancelStart}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-full"
+                                    onClick={handleConfirmStart}
+                                >
+                                    Confirm Start
+                                </button>
                             </div>
                         </Modal>
                     )}

@@ -23,14 +23,10 @@ app.use(bodyParser.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 mongoose.connect(process.env.MONGO_URL).then(()=>{console.log("Database connection established")});
 
-// import userRoutes from "./routes/userRoutes.js";
-// import serviceRoutes from "./routes/serviceRoutes.js";
-// import orderRoutes from "./routes/orderRoutes.js";
-// import adminRoutes from "./routes/adminRoutes.js";
-// import physiotherapistRoutes from "./routes/physiotherapistRoutes.js";
-// import { errorHandler } from "./middleware/errorMiddleware.js";
+
 
 app.use("/api/auth", userAuths);
 app.use('/api/admin', adminRoutes);

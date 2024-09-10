@@ -12,14 +12,16 @@ const ManageOrdersPage = () => {
     const [physiotherapists, setPhysiotherapists] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedPhysiotherapist, setSelectedPhysiotherapist] = useState('');
+    const [totalSessions, setTotalSessions] = useState(''); // New state for total sessions
     const [filterMode, setFilterMode] = useState('all');
     const token = localStorage.getItem('token');
 
     console.log(orders)
+
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/orders', {
+                const response = await axios.get(`${apiUrl}/api/admin/orders`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -32,7 +34,7 @@ const ManageOrdersPage = () => {
 
         const fetchAllPhysiotherapists = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/physiotherapists', {
+                const response = await axios.get(`${apiUrl}/api/admin/physiotherapists`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -45,27 +47,34 @@ const ManageOrdersPage = () => {
 
         fetchAllPhysiotherapists();
         fetchOrders();
+     
     }, [token]);
 
     const handleDetailsClick = (order) => {
         setSelectedOrder(order);
         setSelectedPhysiotherapist('');
+        setTotalSessions(''); // Reset sessions when new order is selected
     };
 
     const handleCloseModal = () => {
         setSelectedOrder(null);
         setSelectedPhysiotherapist('');
+        setTotalSessions(''); // Reset sessions when modal is closed
     };
 
+
     const handleAssignPhysiotherapist = async () => {
-        console.log('Assigning physiotherapist with ID:', selectedPhysiotherapist, 'to order:', selectedOrder._id);
+        if (!totalSessions || totalSessions <= 0) {
+            toast.error('Please enter a valid number of sessions');
+            return;
+        }
 
         try {
             const response = await axios.patch(
                 `${apiUrl}/api/admin/order/${selectedOrder._id}/assign`,
                 {
                     physioId: selectedPhysiotherapist,
-
+                    totalSessions, // Send total sessions along with physiotherapist ID
                 },
                 {
                     headers: {
@@ -74,7 +83,6 @@ const ManageOrdersPage = () => {
                 }
             );
 
-            console.log('Response from server:', response.data);
             if (response.status === 200) {
                 setOrders(orders.map(order =>
                     order._id === selectedOrder._id ? { ...order, physiotherapist: response.data.physiotherapist } : order
@@ -89,7 +97,6 @@ const ManageOrdersPage = () => {
             toast.error('Failed to assign physiotherapist. Please try again.');
         }
     };
-
 
     const filteredOrders = orders.filter(order => {
         if (filterMode === 'assigned') {
@@ -146,6 +153,7 @@ const ManageOrdersPage = () => {
                                     <th>Date</th>
                                     <th>Patient Name</th>
                                     <th>Status</th>
+                                    <th>Sessions</th>
                                     <th>Physiotherapist</th>
                                     <th>Actions</th>
                                 </tr>
@@ -158,6 +166,7 @@ const ManageOrdersPage = () => {
                                         <td className={order.status === 'pending' ? 'text-yellow-500 font-bold' : ''}>
                                             {order.status}
                                         </td>
+                                        <td>{order.completedSessions} / {order.totalSessions}</td>
                                         <td>{order.physiotherapist?.name || 'Not Assigned'}</td>
                                         <td>
                                             <button
@@ -178,26 +187,21 @@ const ManageOrdersPage = () => {
                             <div className="modal-box">
                                 <h3 className="font-bold text-lg">Order Details</h3>
                                 <p className="py-1"><strong>Order ID:</strong> {selectedOrder._id}</p>
-                                <p className="py-1"><strong>Patinet Name: </strong> {selectedOrder.user?.name}</p>
+                                <p className="py-1"><strong>Patient Name: </strong> {selectedOrder.user?.name}</p>
                                 <p className="py-1"><strong>Patient Address: </strong> {selectedOrder.address}</p>
                                 <p className="py-1"><strong>Mobile: </strong> {selectedOrder.mobile}</p>
                                 <p className="py-1"><strong>Status: </strong> {selectedOrder.status}</p>
                                 <p className="py-1"><strong>Pin Code: </strong> {selectedOrder.pin}</p>
-                                <p className="py-1"><strong>Prescription: </strong><a href={selectedOrder.prescription != null ? apiUrl+'/uploads/'+selectedOrder.prescription : '#'} target='_blank' className='text-blue-500'>View</a> </p>
+                                <p className="py-1"><strong>Prescription: </strong><a href={selectedOrder.prescription ? `${apiUrl}/uploads/${selectedOrder.prescription}` : '#'} target='_blank' className='text-blue-500'>View</a> </p>
                                 <div className="py-1"><strong>Services: </strong> 
-                                <ul>
-                                    {selectedOrder.services.map(service => (
-                                        <li key={service._id}> {service.name} </li>
-                                    ))}
-                                </ul>
+                                    <ul>
+                                        {selectedOrder.services.map(service => (
+                                            <li key={service._id}>{service.name}</li>
+                                        ))}
+                                    </ul>
                                 </div>
                                 <p className="py-1"><strong>Assigned Physiotherapist:</strong> {selectedOrder.physiotherapist?.name || 'Not Assigned'}</p>
                                 <p className="py-1"><strong>Physiotherapist Address: </strong> {selectedOrder.physiotherapist?.address || 'Not Assigned'}</p>
-                                <p className="py-1"><strong>Session Start Time: </strong> {selectedOrder.sessionStart ? moment(selectedOrder.sessionStart).format('M/D/YY, h:mm A') : 'Not Set'}
-                                </p>
-                                <p className="py-1"><strong>Session End Time: </strong>  {selectedOrder.sessionEnd ? moment(selectedOrder?.sessionEnd).format('M/D/YY, h:mm A') : 'Not Set'}
-
-                                </p>
 
                                 <div className="mb-4">
                                     <label className="label">
@@ -205,7 +209,7 @@ const ManageOrdersPage = () => {
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
-                                        value={selectedPhysiotherapist._id}
+                                        value={selectedPhysiotherapist}
                                         onChange={(e) => setSelectedPhysiotherapist(e.target.value)}
                                     >
                                         <option value="">Select a physiotherapist</option>
@@ -215,8 +219,25 @@ const ManageOrdersPage = () => {
                                     </select>
                                 </div>
 
+                                <div className="mb-4">
+                                    <label className="label">
+                                        <span className="label-text">Total Sessions</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="input input-bordered w-full"
+                                        placeholder="Enter number of sessions"
+                                        value={totalSessions}
+                                        onChange={(e) => setTotalSessions(e.target.value)}
+                                    />
+                                </div>
+
                                 <div className="modal-action">
-                                    <button className="btn btn-primary" onClick={handleAssignPhysiotherapist}>
+                                    <button
+                                        className="btn bg-green-500 text-white"
+                                        onClick={handleAssignPhysiotherapist}
+                                        disabled={!selectedPhysiotherapist}
+                                    >
                                         Assign Physiotherapist
                                     </button>
                                     <button className="btn" onClick={handleCloseModal}>

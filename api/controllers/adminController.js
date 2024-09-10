@@ -115,15 +115,16 @@ export const manageServices = async (req, res, next) => {
 };
 
 // Assign order to physiotherapist based on pin code
+
 export const assignOrderToPhysioByPin = async (req, res, next) => {
     const { id } = req.params; // order ID
-    const { physioId } = req.body; // User-provided pin code
-
+    const { physioId, totalSessions } = req.body; // Physiotherapist ID and number of sessions
 
     try {
         // Find physiotherapists who serve the given pin code
         const availablePhysios = await User.find({
             role: 'physiotherapist',
+            // Add logic here to filter by service area pins if needed
             // serviceAreas: pinCode
         });
 
@@ -131,25 +132,44 @@ export const assignOrderToPhysioByPin = async (req, res, next) => {
             return next(errorHandler(404, 'No physiotherapists available in this area'));
         }
 
-        // Logic to assign a physiotherapist (e.g., based on availability or manual selection by admin)
-        // For example, let's just assign the first one available
-        // const physioId = availablePhysios[0]._id;
+        // Check if the physiotherapist is available (assuming physioId is selected manually or by availability)
+        const physiotherapist = await User.findById(physioId);
+        if (!physiotherapist || physiotherapist.role !== 'physiotherapist') {
+            return next(errorHandler(400, 'Invalid physiotherapist ID'));
+        }
 
-        const order = await Order.findByIdAndUpdate(id, {
-            physiotherapist: physioId
-        }, { new: true }).populate('physiotherapist');
-
+        // Find the order by ID and update it with the selected physiotherapist and totalSessions
+        const order = await Order.findById(id);
         if (!order) {
             return next(errorHandler(404, 'Order not found'));
         }
 
-        res.status(200).json(order);
+        // Update the order with the physiotherapist and total sessions
+        order.physiotherapist = physioId;
+        order.totalSessions = totalSessions;
+
+        // Generate empty session slots based on totalSessions
+        const newSessions = Array.from({ length: totalSessions }, () => ({
+            status: 'scheduled',
+        }));
+        
+        order.sessions = [...order.sessions, ...newSessions];
+        order.sessionsAssigned = totalSessions;
+
+        // Save the updated order
+        await order.save();
+
+        // Populate the physiotherapist details before returning the response
+        await order.populate('physiotherapist');
+
+        res.status(200).json({
+            message: 'Physiotherapist assigned and sessions created successfully',
+            order,
+        });
     } catch (error) {
         next(errorHandler(500, error.message));
     }
 };
-
-
 
 
 // View all physiotherapists

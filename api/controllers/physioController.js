@@ -1,4 +1,5 @@
 // controllers/physioController.js
+import Application from '../models/applicationModel.js';
 import Order from '../models/orderModel.js';
 import Physiotherapist from '../models/physioModel.js';
 import { errorHandler } from '../utils/error.js';
@@ -8,7 +9,6 @@ import jwt from 'jsonwebtoken';
 // Physiotherapist login
 export const physioLogin = async (req, res, next) => {
     const { email, password } = req.body;
-
     try {
         const physio = await Physiotherapist.findOne({ email });
         if (!physio) return next(errorHandler(401, 'Invalid credentials'));
@@ -23,7 +23,6 @@ export const physioLogin = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-
 // View assigned orders
 export const viewAssignedOrders = async (req, res, next) => {
     try {
@@ -33,7 +32,6 @@ export const viewAssignedOrders = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-
 // Approve/disapprove service
 export const approveDisapproveService = async (req, res, next) => {
     const { id } = req.params; // order ID
@@ -46,7 +44,6 @@ export const approveDisapproveService = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-
 // Manage session details
 export const manageSessionDetails = async (req, res, next) => {
     const { id } = req.params; // order ID
@@ -59,7 +56,6 @@ export const manageSessionDetails = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-
 // View appointments (assuming appointments are part of the order or separate collection)
 export const viewAppointments = async (req, res, next) => {
     try {
@@ -73,9 +69,6 @@ export const viewAppointments = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-
-
-
 export const startSession = async (req, res) => {
     try {
         const session = await Order.findByIdAndUpdate(
@@ -88,7 +81,6 @@ export const startSession = async (req, res) => {
         res.status(500).json({ error: 'Failed to start session' });
     }
 };
-
 export const endSession = async (req, res) => {
     try {
         const session = await Order.findByIdAndUpdate(
@@ -101,3 +93,33 @@ export const endSession = async (req, res) => {
         res.status(500).json({ error: 'Failed to end session' });
     }
 };
+
+export const createApplication = async (req, res) => {
+    try {
+        const application = new Application({ 
+            name: req.body.name,
+            username: req.body.username,
+            contact: req.body.contact,
+            email: req.body.email,
+            dob: req.body.dob,
+            qualification: req.body.qualification,
+            experience: req.body.experience,
+            address: req.body.address,
+            resume: req.file ? req.body.resume : null,
+            certificate: req.file ? req.body.certificate : null,
+         });
+        await application.save();
+        res.status(201).json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create application' });
+    }
+};
+
+export const viewApplications = async (req, res) => {
+    try {
+        const applications = await Application.find();
+        res.status(200).json(applications);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to view applications' });
+    }
+}
