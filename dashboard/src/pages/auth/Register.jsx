@@ -4,6 +4,7 @@ import Navbar from '../../components/Home/Navbar';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { apiUrl } from '../../AppUrl';
+import { Link } from 'react-router-dom';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -214,6 +215,16 @@ const Register = () => {
                             <div className="form-control mt-6">
                                 <button type="submit" className="btn btn-primary">Register</button>
                             </div>
+
+                            <div className='form-control'>
+                            <div className='flex justify-center items-center'>
+                            Already have an account? 
+                        <Link to={'/login'}><label className="label font-bold text-blue-500">
+                              Sign In
+                            </label></Link>
+                            </div>
+                       
+                        </div>
                         </form>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { signInFailure, signInStart, signInSuccess } from '../../app/users/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Home/Navbar';
 
 const Login = () => {
@@ -98,6 +98,16 @@ const Login = () => {
                         </div>
                         <div className="form-control mt-6">
                             <button type="submit" className="btn btn-primary">Sign In</button>
+                        </div>
+
+                        <div className='form-control'>
+                            <div className='flex justify-center items-center'>
+                            Do not have an account? 
+                        <Link to={'/register'}><label className="label font-bold text-blue-500">
+                              Sign Up
+                            </label></Link>
+                            </div>
+                       
                         </div>
                     </form>
                 </div>

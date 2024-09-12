@@ -10,13 +10,14 @@ import { apiUrl } from '../../AppUrl';
 const ManageOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [physiotherapists, setPhysiotherapists] = useState([]);
+    const [services, setServices] = useState([]); // List of available services
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [selectedServices, setSelectedServices] = useState([]); // Track selected services for an order
     const [selectedPhysiotherapist, setSelectedPhysiotherapist] = useState('');
-    const [totalSessions, setTotalSessions] = useState(''); // New state for total sessions
+    const [totalSessions, setTotalSessions] = useState('');
+    const [totalAmount, setTotalAmount] = useState(0); // Track total amount
     const [filterMode, setFilterMode] = useState('all');
     const token = localStorage.getItem('token');
-
-    console.log(orders)
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -45,23 +46,39 @@ const ManageOrdersPage = () => {
             }
         };
 
+        const fetchAllServices = async () => {
+            try {
+                const response = await axios.get(`${apiUrl}/api/services`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setServices(response.data);
+            } catch (error) {
+                console.error('Error fetching services:', error);
+            }
+        };
+
         fetchAllPhysiotherapists();
         fetchOrders();
-     
+        fetchAllServices();
     }, [token]);
 
     const handleDetailsClick = (order) => {
         setSelectedOrder(order);
         setSelectedPhysiotherapist('');
-        setTotalSessions(''); // Reset sessions when new order is selected
+        setTotalSessions('');
+        setSelectedServices(order.services); // Set current order's services
+        setTotalAmount(order.totalAmount || 0); // Set current order's total amount
     };
 
     const handleCloseModal = () => {
         setSelectedOrder(null);
         setSelectedPhysiotherapist('');
-        setTotalSessions(''); // Reset sessions when modal is closed
+        setTotalSessions('');
+        setSelectedServices([]); // Reset services when modal is closed
+        setTotalAmount(0); // Reset total amount when modal is closed
     };
-
 
     const handleAssignPhysiotherapist = async () => {
         if (!totalSessions || totalSessions <= 0) {
@@ -74,7 +91,9 @@ const ManageOrdersPage = () => {
                 `${apiUrl}/api/admin/order/${selectedOrder._id}/assign`,
                 {
                     physioId: selectedPhysiotherapist,
-                    totalSessions, // Send total sessions along with physiotherapist ID
+                    totalSessions,
+                    services: selectedServices, // Update selected services
+                    totalAmount, // Update total amount
                 },
                 {
                     headers: {
@@ -85,16 +104,26 @@ const ManageOrdersPage = () => {
 
             if (response.status === 200) {
                 setOrders(orders.map(order =>
-                    order._id === selectedOrder._id ? { ...order, physiotherapist: response.data.physiotherapist } : order
+                    order._id === selectedOrder._id ? { ...order, physiotherapist: response.data.physiotherapist, services: response.data.services, totalAmount: response.data.totalAmount } : order
                 ));
-                toast.success('Physiotherapist assigned successfully');
+                toast.success('Order updated successfully');
                 handleCloseModal();
             } else {
                 toast.error('Something went wrong');
             }
         } catch (error) {
-            console.error('Error assigning physiotherapist:', error);
-            toast.error('Failed to assign physiotherapist. Please try again.');
+            console.error('Error updating order:', error);
+            toast.error('Failed to update order. Please try again.');
+        }
+    };
+
+    const handleServiceChange = (e, service) => {
+        if (e.target.checked) {
+            setSelectedServices([...selectedServices, service]);
+            setTotalAmount(totalAmount + service.price); // Increase total amount
+        } else {
+            setSelectedServices(selectedServices.filter(s => s._id !== service._id));
+            setTotalAmount(totalAmount - service.price); // Decrease total amount
         }
     };
 
@@ -125,6 +154,7 @@ const ManageOrdersPage = () => {
                 <div className="p-6">
                     <h2 className="text-2xl font-bold text-center">Manage Orders</h2>
 
+                    {/* Filter Buttons */}
                     <div className="btn-group my-4">
                         <button
                             className={`px-4 py-2 ${filterMode === 'all' ? 'bg-blue-500 text-white rounded' : ''}`}
@@ -146,6 +176,7 @@ const ManageOrdersPage = () => {
                         </button>
                     </div>
 
+                    {/* Orders Table */}
                     <div className="overflow-x-auto">
                         <table className="table w-full">
                             <thead>
@@ -155,6 +186,7 @@ const ManageOrdersPage = () => {
                                     <th>Status</th>
                                     <th>Sessions</th>
                                     <th>Physiotherapist</th>
+                                    <th>Total Amount</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -168,6 +200,7 @@ const ManageOrdersPage = () => {
                                         </td>
                                         <td>{order.completedSessions} / {order.totalSessions}</td>
                                         <td>{order.physiotherapist?.name || 'Not Assigned'}</td>
+                                        <td>{order.totalAmount}</td>
                                         <td>
                                             <button
                                                 className="bg-blue-500 text-white rounded px-4 py-2 mx-1"
@@ -181,28 +214,48 @@ const ManageOrdersPage = () => {
                             </tbody>
                         </table>
                     </div>
-
+                    {/* Modal for Editing Order */}
                     {selectedOrder && (
                         <div className="modal modal-open">
                             <div className="modal-box">
                                 <h3 className="font-bold text-lg">Order Details</h3>
                                 <p className="py-1"><strong>Order ID:</strong> {selectedOrder._id}</p>
                                 <p className="py-1"><strong>Patient Name: </strong> {selectedOrder.user?.name}</p>
-                                <p className="py-1"><strong>Patient Address: </strong> {selectedOrder.address}</p>
-                                <p className="py-1"><strong>Mobile: </strong> {selectedOrder.mobile}</p>
                                 <p className="py-1"><strong>Status: </strong> {selectedOrder.status}</p>
-                                <p className="py-1"><strong>Pin Code: </strong> {selectedOrder.pin}</p>
-                                <p className="py-1"><strong>Prescription: </strong><a href={selectedOrder.prescription ? `${apiUrl}/uploads/${selectedOrder.prescription}` : '#'} target='_blank' className='text-blue-500'>View</a> </p>
-                                <div className="py-1"><strong>Services: </strong> 
-                                    <ul>
-                                        {selectedOrder.services.map(service => (
-                                            <li key={service._id}>{service.name}</li>
-                                        ))}
-                                    </ul>
-                                </div>
                                 <p className="py-1"><strong>Assigned Physiotherapist:</strong> {selectedOrder.physiotherapist?.name || 'Not Assigned'}</p>
-                                <p className="py-1"><strong>Physiotherapist Address: </strong> {selectedOrder.physiotherapist?.address || 'Not Assigned'}</p>
 
+                                {/* Service Selection */}
+                                <div className="mb-4">
+                                    <label className="label">
+                                        <span className="label-text">Add or Remove Services</span>
+                                    </label>
+                                    <div className="grid grid-cols-2">
+                                        {services.map(service => (
+                                            <div key={service._id} className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedServices.some(s => s._id === service._id)}
+                                                    onChange={(e) => handleServiceChange(e, service)}
+                                                />
+                                                <span className="ml-2">{service.name}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Total Amount */}
+                                <div className="mb-4">
+                                    <label className="label">
+                                        <span className="label-text">Total Amount</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="input input-bordered w-full"
+                                        value={totalAmount}
+                                        onChange={(e) => setTotalAmount(parseFloat(e.target.value))}
+                                        
+                                    />
+                                </div>
+                                {/* Physiotherapist Selection */}
                                 <div className="mb-4">
                                     <label className="label">
                                         <span className="label-text">Assign Physiotherapist</span>
@@ -212,13 +265,16 @@ const ManageOrdersPage = () => {
                                         value={selectedPhysiotherapist}
                                         onChange={(e) => setSelectedPhysiotherapist(e.target.value)}
                                     >
-                                        <option value="">Select a physiotherapist</option>
+                                        <option value="">Select Physiotherapist</option>
                                         {availablePhysiotherapists.map(physio => (
-                                            <option key={physio._id} value={physio._id}>{physio.name}</option>
+                                            <option key={physio._id} value={physio._id}>
+                                                {physio.name}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
 
+                                {/* Total Sessions Input */}
                                 <div className="mb-4">
                                     <label className="label">
                                         <span className="label-text">Total Sessions</span>
@@ -226,7 +282,6 @@ const ManageOrdersPage = () => {
                                     <input
                                         type="number"
                                         className="input input-bordered w-full"
-                                        placeholder="Enter number of sessions"
                                         value={totalSessions}
                                         onChange={(e) => setTotalSessions(e.target.value)}
                                     />
@@ -234,15 +289,13 @@ const ManageOrdersPage = () => {
 
                                 <div className="modal-action">
                                     <button
-                                        className="btn bg-green-500 text-white"
+                                        className="btn btn-success"
                                         onClick={handleAssignPhysiotherapist}
-                                        disabled={!selectedPhysiotherapist}
+                                        disabled={!selectedPhysiotherapist || totalSessions <= 0 || selectedServices.length === 0}
                                     >
-                                        Assign Physiotherapist
+                                        Save Changes
                                     </button>
-                                    <button className="btn" onClick={handleCloseModal}>
-                                        Close
-                                    </button>
+                                    <button className="btn" onClick={handleCloseModal}>Cancel</button>
                                 </div>
                             </div>
                         </div>

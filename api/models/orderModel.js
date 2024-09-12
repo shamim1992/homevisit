@@ -21,7 +21,11 @@ const orderSchema = new mongoose.Schema(
         completedSessions: { type: Number, default: 0 },
         sessions: [sessionSchema],
         prescription: { type: String },
-        referredDoctor: { type: String }
+        referredDoctor: { type: String },
+        totalAmount:{ type: Number},
+        paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+        paymentMethod: { type: String, default: 'cash' }, // 'cash', 'card', 'online'
+        paymentDetails: { type: Object },
     },
     { timestamps: true }
 );

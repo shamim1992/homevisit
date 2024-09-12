@@ -1,6 +1,6 @@
 // routes/orderRoutes.js
 import express from 'express';
-import { createOrder, getUserOrders, getOrder, updateOrder, getAllOrders, service_area, addSessionToOrder, updateSession, deleteSessionFromOrder } from '../controllers/orderController.js';
+import { createOrder, getUserOrders, getOrder, updateOrder, getAllOrders, service_area, addSessionToOrder, updateSession, deleteSessionFromOrder, updatePaymentStatus } from '../controllers/orderController.js';
 import { authenticate } from '../middleware/authMiddleware.js';
 import  upload from '../middleware/fileUpload.js';
 
@@ -21,5 +21,9 @@ router.delete('/delete-session',  deleteSessionFromOrder);
 // Admin routes
 router.get('/', authenticate, getAllOrders);
 router.put('/:id', authenticate, updateOrder);
+
+
+router.patch('/:orderId/payment-status', updatePaymentStatus);
+
 
 export default router;

@@ -94,7 +94,11 @@ export const endSession = async (req, res) => {
     }
 };
 
+
 export const createApplication = async (req, res) => {
+    console.log("Received request body:", req.body);
+    console.log("Received files:", req.files);
+
     try {
         const application = new Application({ 
             name: req.body.name,
@@ -105,13 +109,19 @@ export const createApplication = async (req, res) => {
             qualification: req.body.qualification,
             experience: req.body.experience,
             address: req.body.address,
-            resume: req.file ? req.body.resume : null,
-            certificate: req.file ? req.body.certificate : null,
-         });
+            state: req.body.state,
+            district: req.body.district,
+            city: req.body.city,
+            prefferedarea: req.body.prefferedarea,
+            resume: req.files && req.files.resume ? req.files.resume[0].filename : null,
+            certificate: req.files && req.files.certificate ? req.files.certificate[0].filename : null,
+        });
+
         await application.save();
         res.status(201).json(application);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create application' });
+        console.error("Error creating application:", error);
+        res.status(500).json({ error: 'Failed to create application', details: error.message });
     }
 };
 
@@ -121,5 +131,25 @@ export const viewApplications = async (req, res) => {
         res.status(200).json(applications);
     } catch (error) {
         res.status(500).json({ error: 'Failed to view applications' });
+    }
+}
+
+export const approveApplication = async (req, res) => {
+    try {
+        const application = await Application.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
+        res.status(200).json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to approve application' });
+    }
+}
+
+// single Application
+export const viewApplicationById = async (req, res) => {
+    try {
+        const application = await Application.findById(req.params.id);
+        if (!application) return res.status(404).json({ error: 'Application not found' });
+        res.status(200).json(application);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to view application' });
     }
 }

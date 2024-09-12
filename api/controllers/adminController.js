@@ -118,7 +118,7 @@ export const manageServices = async (req, res, next) => {
 
 export const assignOrderToPhysioByPin = async (req, res, next) => {
     const { id } = req.params; // order ID
-    const { physioId, totalSessions } = req.body; // Physiotherapist ID and number of sessions
+    const { physioId, totalSessions, totalAmount } = req.body; // Physiotherapist ID and number of sessions
 
     try {
         // Find physiotherapists who serve the given pin code
@@ -147,6 +147,7 @@ export const assignOrderToPhysioByPin = async (req, res, next) => {
         // Update the order with the physiotherapist and total sessions
         order.physiotherapist = physioId;
         order.totalSessions = totalSessions;
+        order.totalAmount = totalAmount;
 
         // Generate empty session slots based on totalSessions
         const newSessions = Array.from({ length: totalSessions }, () => ({

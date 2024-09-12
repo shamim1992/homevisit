@@ -6,21 +6,16 @@ const applicationSchema = new mongoose.Schema({
         required: true
     },
     username:{
-        type: String,
-        required: true,
-        unique: true
+        type: String,  
     },
     contact:{
         type: String,
     },
     email:{
         type: String,
-        required: true,
-        unique: true
     },
     dob:{   
         type: Date,
-        required: true
     },
     qualification:{
         type: String,
@@ -31,10 +26,22 @@ const applicationSchema = new mongoose.Schema({
     address:{
         type: String,
     },
+    state:{
+        type: String,
+    },
+    district:{
+        type: String,
+    },
+    city:{
+        type: String,
+    },
     resume:{
         type: String,
     },
     certificate:{
+        type: String,
+    },
+    prefferedarea:{
         type: String,
     }
 },{timestamps: true});

@@ -16,7 +16,7 @@ const Navbar = () => {
         navigate('/login');
     };
     return (
-        <div className="navbar bg-blue-500 text-white px-24">
+        <div className="navbar bg-blue-500 text-white px-3 lg:px-24">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -51,7 +51,9 @@ const Navbar = () => {
                     <li><Link to={'/'}>Home</Link></li>
                     <li><Link to={'/about'}>About Us</Link></li>
                     <li><Link to={'/service'}>Services</Link></li>
+                    <li><Link to={'/apply'}>Join Us</Link></li>
                     <li><Link to={'/contact'}>Contact</Link></li>
+
                     {
                         currentUser && currentUser.role === 'admin'? <li><a>Admin</a></li> : null
                     }

@@ -26,6 +26,9 @@ import AboutPage from './pages/home/AboutPage';
 import ServicePage from './pages/home/ServicePage';
 import ContactUs from './pages/home/ContactUs';
 import Appointment from './pages/home/Appointment';
+import ApplyNow from './components/user/ApplyNow';
+import ManageApplication from './pages/admin/ManageApplication';
+import Applicant from './pages/admin/Applicant';
 
 
 const App = () => {
@@ -37,6 +40,7 @@ const App = () => {
       <Routes>
 
         <Route path='/' element={<HomePage />} />
+        <Route path="/apply" element={<ApplyNow />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/service" element={<ServicePage />} />
         <Route path='/contact' element={<ContactUs />} />
@@ -64,6 +68,8 @@ const App = () => {
           <Route path="/admin/physiotherapists" element={<ManagePhysiotherapistsPage />} />
           <Route path="/admin/services" element={<ManageServicesPage />} />
           <Route path="/admin/assign" element={<AssignOrderPage />} />
+          <Route path="/admin/application" element={<ManageApplication />} />
+          <Route path='admin/applicant/:id' element={<Applicant/>} />
         </Route>
 
   
