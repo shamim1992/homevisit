@@ -4,6 +4,7 @@ import { signInFailure, signInStart, signInSuccess } from '../../app/users/userS
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Home/Navbar';
+import { apiUrl } from '../../AppUrl';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -37,7 +38,7 @@ const Login = () => {
     dispatch(signInStart());
 
     try {
-        const response = await axios.post('http://localhost:5002/api/auth/login', {
+        const response = await axios.post(`${apiUrl}/api/auth/login`, {
             username,
             password
         });
@@ -97,14 +98,19 @@ const Login = () => {
                             </label>
                         </div>
                         <div className="form-control mt-6">
-                            <button type="submit" className="btn btn-primary">Sign In</button>
+                            <button type="submit" className="px-6 py-2 bg-blue-500 text-white max-w-sm mx-auto rounded-full hover:shadow-lg font-bold">Sign In</button>
                         </div>
 
                         <div className='form-control'>
                             <div className='flex justify-center items-center'>
                             Do not have an account? 
-                        <Link to={'/register'}><label className="label font-bold text-blue-500">
+                        <Link to={'/register'}><label className="label font-bold text-blue-500 cursor-pointer">
                               Sign Up
+                            </label></Link>
+                            </div>
+                            <div className='flex justify-center items-center'>
+                            Forgot password? <Link to={'/forgot-password'}><label className="label font-bold text-blue-500 cursor-pointer">
+                              Click Here
                             </label></Link>
                             </div>
                        

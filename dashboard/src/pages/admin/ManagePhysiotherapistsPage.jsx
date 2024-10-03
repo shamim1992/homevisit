@@ -20,12 +20,12 @@ const ManagePhysiotherapistsPage = () => {
     const [district, setDistrict] = useState('');
     const [city, setCity] = useState('');
 
-    const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const fetchPhysiotherapists = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/admin/physiotherapists', {
+                const response = await axios.get(`${apiUrl}/api/admin/physiotherapists`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

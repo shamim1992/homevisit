@@ -37,9 +37,7 @@ const ManageApplication = () => {
             <div className='flex-1'>
                 <Navbar />
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-center">Manage Users</h2>
-
-
+                    <h2 className="text-2xl font-bold text-center">Manage Application</h2>
                     <div className="overflow-x-auto">
                         <table className="table w-full">
                             <thead>
@@ -59,7 +57,7 @@ const ManageApplication = () => {
                                                 <td>{items.email}</td>
                                                 <td>{items.contact}</td>
                                                 <td>
-                                                    <Link to={`/admin/applicant/${items._id}`} className="">View</Link>
+                                                    <Link to={`/admin/applicant/${items._id}`} className="text-blue-500 font-bold">View</Link>
                                                 </td>
                                             </tr>
                                         )

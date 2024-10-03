@@ -2,6 +2,8 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import Navbar from '../../components/Home/Navbar';
 import { apiUrl } from '../../AppUrl';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ApplyNow = () => {
     const [formData, setFormData] = useState({
@@ -39,8 +41,6 @@ const ApplyNow = () => {
         e.preventDefault();
         const formDataToSend = new FormData();
         
-        console.log("Form Data before sending:", formData);
-        
         Object.entries(formData).forEach(([key, value]) => {
             formDataToSend.append(key, value);
         });
@@ -52,10 +52,7 @@ const ApplyNow = () => {
             formDataToSend.append('certificate', certificate);
         }
 
-       
-
         try {
-
             const response = await axios.post(`${apiUrl}/api/physio/create`, formDataToSend, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -63,21 +60,40 @@ const ApplyNow = () => {
             });
             console.log('Application successful:', response.data);
 
-            
-           
+            // Clear the form after successful submission
+            setFormData({
+                name: '',
+                username: '',
+                contact: '',
+                email: '',
+                dob: '',
+                qualification: '',
+                experience: '',
+                address: '',
+                state: '',
+                district: '',
+                city: '',
+                prefferedarea: ''
+            });
+            setResume(null);
+            setCertificate(null);
+
+            // Show success toast
+            toast.success('Form submitted successfully!');
         } catch (err) {
             console.error('Registration error:', err);
             if (err.response) {
                 console.error('Error response:', err.response.data);
                 console.error('Error status:', err.response.status);
             }
-            alert('Registration failed. Please try again.');
+            toast.error('Registration failed. Please try again.');
         }
     };
 
     return (
         <>
             <Navbar />
+            <ToastContainer /> {/* Toast container to display toast notifications */}
             <div className="min-h-screen">
                 <div className="flex flex-col lg:flex-row items-center justify-around lg:px-24 py-10">
                     <div className="text-center lg:text-left flex-1">
@@ -87,7 +103,6 @@ const ApplyNow = () => {
                     <div className="card flex-1 w-full lg:max-w-4xl shadow-md bg-base-100">
                         <div>
                             <h1 className='text-5xl font-bold text-center'>Join Us</h1>
-
                         </div>
                         <form className="card-body" onSubmit={handleSubmit}>
                             <div className='flex flex-col lg:flex-row gap-6 items-center'>
@@ -221,7 +236,6 @@ const ApplyNow = () => {
                                     name="resume"
                                     className="input-bordered"
                                     onChange={handleFileChange}
-                                    
                                 />
                             </div>
                             <div className="form-control">
@@ -233,7 +247,6 @@ const ApplyNow = () => {
                                     name="certificate"
                                     className="input-bordered"
                                     onChange={handleFileChange}
-                                   
                                 />
                             </div>
                             <div className="form-control">

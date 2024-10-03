@@ -14,6 +14,7 @@ import physioRoutes from './routes/physioRoutes.js';
 import serviceRoutes from './routes/serviceRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/physio', physioRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/payment', paymentRoutes);
 
 app.listen(process.env.PORT, ()=>{
     console.log("server is running")

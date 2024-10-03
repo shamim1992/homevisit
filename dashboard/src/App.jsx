@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route,  } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, } from 'react-router-dom';
 
 import Login from './pages/auth/Login';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -29,6 +29,8 @@ import Appointment from './pages/home/Appointment';
 import ApplyNow from './components/user/ApplyNow';
 import ManageApplication from './pages/admin/ManageApplication';
 import Applicant from './pages/admin/Applicant';
+import ForgotPassword from './pages/home/ForgotPassword';
+import ResetPassword from './pages/home/ResetPassword';
 
 
 const App = () => {
@@ -47,12 +49,16 @@ const App = () => {
         <Route path='/appointment' element={<Appointment />} />
         <Route path="/login" element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+
         <Route path="/user/dashboard" element={<UserDash />}>
           <Route index element={<Dashboard />} />
         </Route>
         <Route path="/user/orders" element={<Orders />} />
         <Route path="/user/profile" element={<Profile />} />
-        
+
 
         {/* physio routes */}
         <Route path="/physio/appointments" element={<Appointments />} />
@@ -69,10 +75,10 @@ const App = () => {
           <Route path="/admin/services" element={<ManageServicesPage />} />
           <Route path="/admin/assign" element={<AssignOrderPage />} />
           <Route path="/admin/application" element={<ManageApplication />} />
-          <Route path='admin/applicant/:id' element={<Applicant/>} />
+          <Route path='admin/applicant/:id' element={<Applicant />} />
         </Route>
 
-  
+
 
 
 

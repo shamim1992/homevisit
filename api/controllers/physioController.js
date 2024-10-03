@@ -6,7 +6,6 @@ import { errorHandler } from '../utils/error.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Physiotherapist login
 export const physioLogin = async (req, res, next) => {
     const { email, password } = req.body;
     try {
@@ -23,7 +22,6 @@ export const physioLogin = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-// View assigned orders
 export const viewAssignedOrders = async (req, res, next) => {
     try {
         const orders = await Order.find({ physiotherapist: req.user._id }).populate('user', 'name email').populate('services', 'name price');
@@ -32,7 +30,6 @@ export const viewAssignedOrders = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-// Approve/disapprove service
 export const approveDisapproveService = async (req, res, next) => {
     const { id } = req.params; // order ID
     const { status } = req.body;
@@ -44,7 +41,6 @@ export const approveDisapproveService = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-// Manage session details
 export const manageSessionDetails = async (req, res, next) => {
     const { id } = req.params; // order ID
     const { sessionStart, sessionEnd } = req.body;
@@ -56,7 +52,6 @@ export const manageSessionDetails = async (req, res, next) => {
         next(errorHandler(500, error.message));
     }
 };
-// View appointments (assuming appointments are part of the order or separate collection)
 export const viewAppointments = async (req, res, next) => {
     try {
         // const appointments = await Order.find({ physiotherapist: req.user._id }).select('sessionStart sessionEnd user').populate('services user physiotherapist');
@@ -93,14 +88,22 @@ export const endSession = async (req, res) => {
         res.status(500).json({ error: 'Failed to end session' });
     }
 };
-
-
 export const createApplication = async (req, res) => {
     console.log("Received request body:", req.body);
     console.log("Received files:", req.files);
 
     try {
-        const application = new Application({ 
+        const existingApplication = await Application.findOne({ 
+            $or: [
+                { email: req.body.email },
+                { username: req.body.username }
+            ]
+        });
+
+        if (existingApplication) {
+            return res.status(400).json({ error: 'An application with this email or username already exists.' });
+        }
+        const application = new Application({
             name: req.body.name,
             username: req.body.username,
             contact: req.body.contact,
@@ -124,7 +127,6 @@ export const createApplication = async (req, res) => {
         res.status(500).json({ error: 'Failed to create application', details: error.message });
     }
 };
-
 export const viewApplications = async (req, res) => {
     try {
         const applications = await Application.find();
@@ -133,7 +135,6 @@ export const viewApplications = async (req, res) => {
         res.status(500).json({ error: 'Failed to view applications' });
     }
 }
-
 export const approveApplication = async (req, res) => {
     try {
         const application = await Application.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
@@ -142,8 +143,6 @@ export const approveApplication = async (req, res) => {
         res.status(500).json({ error: 'Failed to approve application' });
     }
 }
-
-// single Application
 export const viewApplicationById = async (req, res) => {
     try {
         const application = await Application.findById(req.params.id);

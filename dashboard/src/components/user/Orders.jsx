@@ -24,7 +24,6 @@ const Orders = () => {
                 console.error('Error fetching orders:', error);
             }
         };
-
         fetchOrders();
     }, [token]);
 
@@ -36,6 +35,7 @@ const Orders = () => {
         setSelectedOrder(null);
     };
 
+    // Render session status
     const renderSessionStatus = (session) => {
         switch (session.status) {
             case 'scheduled':
@@ -51,9 +51,66 @@ const Orders = () => {
         }
     };
 
+    // Function to initiate payment
+    const handlePayment = async (order) => {
+        try {
+            const response = await axios.post(`${apiUrl}/api/payment/initiate`, 
+            { totalAmount: order.totalAmount, orderId: order._id }, 
+            { headers: { Authorization: `Bearer ${token}` } });
+
+            const { order: razorpayOrder } = response.data;
+
+            // Razorpay options
+            const options = {
+                key: process.env.REACT_APP_RAZORPAY_KEY_ID, // Replace with your Razorpay Key ID
+                amount: razorpayOrder.amount,
+                currency: 'INR',
+                name: 'Physiotherapy Service',
+                description: `Payment for Order ID: ${order._id}`,
+                order_id: razorpayOrder.id,
+                handler: async (response) => {
+                    // Handle successful payment here
+                    const paymentData = {
+                        order_id: razorpayOrder.id,
+                        payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                    };
+
+                    // Send payment verification data to backend
+                    await axios.post(`${apiUrl}/api/payment/verify`, paymentData, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+
+                    // Fetch updated orders after payment
+                    const updatedOrders = await axios.get(`${apiUrl}/api/orders/myorders`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    setOrders(updatedOrders.data);
+                    setSelectedOrder(null);
+                },
+                prefill: {
+                    name: order.patientname,
+                    email: '', // If you have the user's email
+                    contact: order.mobile,
+                },
+                theme: {
+                    color: '#3399cc',
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
+        } catch (error) {
+            console.error('Error initiating payment:', error);
+        }
+    };
+
     return (
         <div className="flex">
-            <Sidebar /> {/* Sidebar component */}
+            <Sidebar />
             <div className="flex-1">
                 <Navbar />
                 <div className="p-6">
@@ -65,7 +122,7 @@ const Orders = () => {
                                     <th>Booking Date</th>
                                     <th>Service</th>
                                     <th>Status</th>
-                                    <th>Preffered Date</th>
+                                    <th>Preferred Date</th>
                                     <th>Completed / Total Sessions</th>
                                     <th>Actions</th>
                                 </tr>
@@ -100,6 +157,7 @@ const Orders = () => {
                                 <p className="py-2"><strong>Services:</strong> {selectedOrder.services.map(service => service.name).join(', ')}</p>
                                 <p className="py-2"><strong>Status:</strong> {selectedOrder.status}</p>
                                 <p className="py-2"><strong>Physiotherapist:</strong> {selectedOrder.physiotherapist?.name || 'Not assigned'}</p>
+                                
                                 <table className="table w-full">
                                     <thead>
                                         <tr>
@@ -107,7 +165,6 @@ const Orders = () => {
                                             <th>Status</th>
                                             <th>Start Time</th>
                                             <th>End Time</th>
-
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -117,19 +174,27 @@ const Orders = () => {
                                                 <td>{renderSessionStatus(session)}</td>
                                                 <td>{session.sessionStart ? moment(session.sessionStart).format('M-D-YY, h:mm A') : 'Not Started'}</td>
                                                 <td>{session.sessionEnd ? moment(session.sessionEnd).format('M-D-YY, h:mm A') : 'Not Ended'}</td>
-
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
+
+                                {/* Payment Section */}
+                                {selectedOrder.paymentStatus === 'pending' && (
+                                    <button
+                                        className="bg-green-500 text-white rounded px-4 py-2 mt-4"
+                                        onClick={() => handlePayment(selectedOrder)}
+                                    >
+                                        Pay Now ({selectedOrder.totalAmount} INR)
+                                    </button>
+                                )}
+
                                 <div className="modal-action">
                                     <button className="btn" onClick={handleCloseModal}>
                                         Close
                                     </button>
                                 </div>
-                                
                             </div>
-
                         </div>
                     )}
                 </div>

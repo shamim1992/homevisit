@@ -14,7 +14,7 @@ const PatientDetails = () => {
     useEffect(() => {
         const fetchPatientDetails = async () => {
             try {
-                const response = await axios.get(`http://localhost:5002/api/physio/patient/${patientId}`, {
+                const response = await axios.get(`${apiUrl}/api/physio/patient/${patientId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -27,7 +27,7 @@ const PatientDetails = () => {
 
         const fetchPatientSessions = async () => {
             try {
-                const response = await axios.get(`http://localhost:5002/api/physio/patient/${patientId}/sessions`, {
+                const response = await axios.get(`${apiUrl}/api/physio/patient/${patientId}/sessions`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

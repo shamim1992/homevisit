@@ -5,42 +5,9 @@ import User from '../models/userModel.js';
 import path from 'path';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
-
-// export const createOrder = async (req, res) => {
-//     const { patientname, services, physiotherapist, address, pin, preferredDate, mobile, referredDoctor } = req.body;
-//     const userId = req.user.id;
-//     console.log(req.body)
-
-//     try {
-//         const order = new Order({
-//             user: userId,
-//             patientname, 
-//             services,
-//             physiotherapist,
-//             status: 'pending', 
-//             address,
-//             pin, 
-//             preferredDate,
-//             mobile,
-//             referredDoctor,
-//             prescription: req.file ? req.file.filename : null, 
-//         });
-
-//         await order.save();
-
-//         res.status(201).json(order);
-//     } catch (error) {
-//         res.status(500).json({ error: 'Failed to book appointment' });
-//     }
-// };
-
-
-
-
 export const createOrder = async (req, res) => {
     const { patientname, services, physiotherapist, address, pin, preferredDate, mobile, referredDoctor } = req.body;
     const userId = req.user.id;
-
     try {
         // Create new order
         const order = new Order({
@@ -58,38 +25,34 @@ export const createOrder = async (req, res) => {
         });
 
         await order.save();
-
         // Set up Nodemailer Transport
         const transporter = nodemailer.createTransport({
-            service: 'gmail', // You can use any SMTP service like Gmail, Outlook, etc.
+            service: 'gmail', 
             auth: {
-                user: process.env.EMAIL_USER, // Use environment variables to store email credentials
+                user: process.env.EMAIL_USER, 
                 pass: process.env.EMAIL_PASS,
             },
         });
-
         // Define email options
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: req.user.email,
-            // cc: process.env.CC_EMAIL,
-            subject: 'Order Confirmation',
+            cc: process.env.CC_EMAIL,
+            subject: 'Home Physiotherapy Appointment Booking',
             text: `Dear ${patientname},
-Thank you for booking an appointment.
-Here are your order details:
-- Services: ${services.join(', ')}
-- Physiotherapist: ${physiotherapist ? physiotherapist.name : 'Not Assigned Yet'}
-- Address: ${address}
-- Mobile: ${mobile}
-- Preferred Date: ${new Date(preferredDate).toLocaleDateString()}
-- Pin Code: ${pin}
+            Thank you for booking an appointment with ChanRe Physio.
+            Here are your order details:
+            - Services: ${services.join(', ')}
+            - Physiotherapist: ${physiotherapist ? physiotherapist.name : 'Not Assigned Yet, will be assigned shortly'}
+            - Address: ${address}
+            - Mobile: ${mobile}
+            - Preferred Date: ${new Date(preferredDate).toLocaleDateString()}
+            - Pin Code: ${pin}
+            We will notify you once your order is processed. 
 
-We will notify you once your order is processed.
-
-Best regards,
-Your Company`,
+            Best regards,
+            ChanRe Physio`,
         };
-
         // Send email
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {

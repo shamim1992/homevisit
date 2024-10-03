@@ -13,11 +13,9 @@ const Sidebar = () => {
           <li className='py-2 font-lg hover:bg-slate-200 hover:text-black px-2 rounded'><Link to="/admin/orders" >Manage Orders</Link></li>
           <li className='py-2 font-lg hover:bg-slate-200 hover:text-black px-2 rounded'><Link to="/admin/physiotherapists" >Manage Physiotherapists</Link></li>
           <li className='py-2 font-lg hover:bg-slate-200 hover:text-black px-2 rounded'><Link to="/admin/services" >Manage Services</Link></li>
-          <li className='py-2 font-lg hover:bg-slate-200 hover:text-black px-2 rounded'><Link to="/admin/application" >Application</Link></li>
+          <li className='py-2 font-lg hover:bg-slate-200 hover:text-black px-2 rounded'><Link to="/admin/application" >Manage Applications</Link></li>
         </ul>
       </div>
-
-
     </div>
   )
 }

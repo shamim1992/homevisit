@@ -213,13 +213,13 @@ const Register = () => {
                                 />
                             </div>
                             <div className="form-control mt-6">
-                                <button type="submit" className="btn btn-primary">Register</button>
+                                <button type="submit" className="px-6 py-2 bg-blue-500 text-white max-w-sm mx-auto rounded-full hover:shadow-lg font-bold">Register</button>
                             </div>
 
                             <div className='form-control'>
                             <div className='flex justify-center items-center'>
                             Already have an account? 
-                        <Link to={'/login'}><label className="label font-bold text-blue-500">
+                        <Link to={'/login'}><label className="label font-bold text-blue-500 cursor-pointer">
                               Sign In
                             </label></Link>
                             </div>

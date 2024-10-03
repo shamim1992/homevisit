@@ -9,14 +9,12 @@ const ManageServicesPage = () => {
     const [editingService, setEditingService] = useState(null);
     const [serviceData, setServiceData] = useState({ name: '', price: '', description: '' });
     const [newService, setNewService] = useState({ name: '', price: '', description: '' });
-
     // Fetch token from localStorage
     const token = localStorage.getItem('token');
-
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/services', {
+                const response = await axios.get(`${apiUrl}/api/services`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -31,7 +29,7 @@ const ManageServicesPage = () => {
 
     const deleteService = async (id) => {
         try {
-            await axios.delete(`http://localhost:5002/api/services/${id}`, {
+            await axios.delete(`${apiUrl}/api/services/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

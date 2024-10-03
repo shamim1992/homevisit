@@ -36,10 +36,11 @@ const Navbar = () => {
                     <ul
                         tabIndex={0}
                         className="menu menu-sm dropdown-content bg-blue-500 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                        <li><a>Home</a></li>
-                        <li><a>About</a></li>
-                        <li><a>Services</a></li>
-                        <li><a>Contact</a></li>
+                        <li><Link to={'/'}>Home</Link></li>
+                    <li><Link to={'/about'}>About Us</Link></li>
+                    <li><Link to={'/service'}>Services</Link></li>
+                    <li><Link to={'/apply'}>Join Us</Link></li>
+                    <li><Link to={'/contact'}>Contact</Link></li>
                     </ul>
                 </div>
                 <a className="btn btn-ghost text-xl">ChanRe Physio</a>
@@ -68,8 +69,9 @@ const Navbar = () => {
             </div>
             <div className="navbar-end">
                 {
-                    currentUser == null ? <><Link to={'/login'} className="px-6 py-2 rounded-full bg-[#893170] font-bold cursor-pointer hover:bg-[#893170] hover:shadow-xl">Login</Link>
-                        <Link to={'/register'} className="px-6 py-2 rounded-full bg-[#893170] font-bold cursor-pointer hover:bg-[#893170] hover:shadow-xl">Signup</Link></> : <a className="px-6 py-2 rounded-full bg-[#893170] font-bold cursor-pointer hover:bg-[#893170] hover:shadow-xl" onClick={handleLogout}>Logout</a>
+                    currentUser == null ? <div className='flex items-center justify-center gap-2'>
+                    <Link to={'/login'} className="px-6 py-2 rounded-full bg-[#893170] font-bold cursor-pointer hover:bg-[#893170] hover:shadow-xl">Login</Link>
+                   </div> : <a className="px-6 py-2 rounded-full bg-[#893170] font-bold cursor-pointer hover:bg-[#893170] hover:shadow-xl" onClick={handleLogout}>Logout</a>
                 }
 
             </div>
